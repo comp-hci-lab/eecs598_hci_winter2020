@@ -4,21 +4,21 @@ class Operator():
 
 	def execute():
 		#Return a set of properties for what happens when you execute it (Time, cycle, etc)
+		#should return a snapshot of what is going on at that time along with how long it took
 
 
 class Perceptual(Operator):
 
-	def __init__(self):
+	def __init__(self, storage):
 		#Initialize Perceptual values
+		#Need access to some sort of some storage
+		self.storage = storage
 		
-
-
-	def inputIsWord(self):
-		#Given input is word
-		self.isWord = True
-
-
 class Visual(Perceptual):
+
+	def __init__(self):
+
+	def execute():
 
 
 class Auditory(Perceptual):
@@ -29,16 +29,16 @@ class Haptic(Perceptual):
 
 class Cognitive(Operator):
 
-	def __init__(self, item, uniq_id, dependent, start_time, end_time):
-		#Initialize Perceptual values
-		super().__init__(item, uniq_id, dependent, start_time, end_time)
+	def __init__(self):
+		#Have access to LTM/STM
+		self.long_term_memory = LongTermMemory()
+
 
 
 class Motor(Operator):
 
-	def __init__(self, item, uniq_id, dependent, start_time, end_time):
-		#Initialize Perceptual values
-		super().__init__(item, uniq_id, dependent, start_time, end_time)
+	def __init__(self):
+
 
 
 class Memory():
