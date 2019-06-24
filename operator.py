@@ -23,8 +23,16 @@ class Visual(Perceptual):
 
 class Auditory(Perceptual):
 
+	def __init__(self):
+
+	def execute():
+
 
 class Haptic(Perceptual):
+
+	def __init__(self):
+
+	def execute():
 
 
 class Cognitive(Operator):
@@ -32,6 +40,9 @@ class Cognitive(Operator):
 	def __init__(self):
 		#Have access to LTM/STM
 		self.long_term_memory = LongTermMemory()
+		self.short_term_memory = ShortTermMemory()
+
+	def execute():
 
 
 
@@ -40,24 +51,35 @@ class Motor(Operator):
 	def __init__(self):
 
 
+	def execute():
+
+
 
 class Memory():
 
-	def __init__(self, newPiece):
-		self.newPiece = newPiece
+	def __init__(self, newPiece=None):
+		if newPiece:
+			self.newPiece = newPiece
 
 class LongTermMemory(Memory):
 
-	def __init__(self, newPiece):
+	def __init__(self, newPiece=None):
 		super().__init__(newPiece)
+		self.LTM = []
+		if newPiece:
+			addToMemory(newPiece)
+
+	def addToMemory(self, newPiece):
+		self.LTM.append(newPiece)
 
 
 class ShortTermMemory(Memory):
 
-	def __init__(self, newPiece):
+	def __init__(self, newPiece=None):
 		super().__init__(newPiece)
 		self.STM = []
-		addToMemory(newPiece)
+		if newPiece:
+			addToMemory(newPiece)
 
 	def addToMemory(self, newPiece):
 		if self.newPiece in self.STM:
@@ -70,10 +92,9 @@ class ShortTermMemory(Memory):
 			self.STM.append(self.newPiece)
 
 class Fingers():
-	#Implement Fitts Law in this class
+	
 	def __init__(self):
 
-	def fittsLaw(self):
 
 class Eyes():
 	#Implement Visual Search in this class
