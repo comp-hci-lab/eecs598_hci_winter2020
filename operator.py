@@ -2,7 +2,7 @@ class Operator():
 	#All operators use this as base
 	def __init__(self):
 
-	def execute():
+	def execute(self):
 		#Return a set of properties for what happens when you execute it (Time, cycle, etc)
 		#should return a snapshot of what is going on at that time along with how long it took
 
@@ -18,21 +18,21 @@ class Visual(Perceptual):
 
 	def __init__(self):
 
-	def execute():
+	def execute(self):
 
 
 class Auditory(Perceptual):
 
 	def __init__(self):
 
-	def execute():
+	def execute(self):
 
 
 class Haptic(Perceptual):
 
 	def __init__(self):
 
-	def execute():
+	def execute(self):
 
 
 class Cognitive(Operator):
@@ -42,7 +42,7 @@ class Cognitive(Operator):
 		self.long_term_memory = LongTermMemory()
 		self.short_term_memory = ShortTermMemory()
 
-	def execute():
+	def execute(self):
 
 
 
@@ -51,7 +51,7 @@ class Motor(Operator):
 	def __init__(self):
 
 
-	def execute():
+	def execute(self):
 
 
 
