@@ -64,7 +64,7 @@ class Schedule_Chart():
 					dependent = []
 					self.cogn_ind += 1
 
-					#COULD ADD VISUAL SEARCH OF LOOKING FOR KEYS
+					#COULD ADD VISUAL SEARCH OF LOOKING FOR KEYS/THINKING ABOUT KEYS
 
 					#Press key
                     #Dependent on thinking of typing the key and previous motor
@@ -84,7 +84,7 @@ class Schedule_Chart():
 				dependent = []
 				self.cogn_ind += 1
 
-				#COULD ADD VISUAL SEARCH OF LOOKING FOR KEYS
+				#COULD ADD VISUAL SEARCH OF LOOKING FOR KEYS/THINKING ABOUT KEYS
 
 				#Press key
                 #Dependent on thinking of typing the key and previous motor
@@ -107,7 +107,7 @@ class Schedule_Chart():
 				dependent = []
 				self.cogn_ind += 1
 
-				#COULD ADD VISUAL SEARCH OF LOOKING FOR KEYS
+				#COULD ADD VISUAL SEARCH OF LOOKING FOR KEYS/THINKING ABOUT KEYS
 
 				#Press key
                 #Dependent on thinking of typing the key and previous motor
@@ -204,6 +204,7 @@ class Schedule_Chart():
 
   		finished.append(self.motor_queue[self.motor_crit_ind].uniq_num)
   		self.motor_crit_ind += 1
+
 
 class Chart_Input():
 
