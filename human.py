@@ -1,3 +1,5 @@
+from abc import ABCMeta, abstractmethod
+
 class Human():
 
 	def __init__(self):
@@ -18,19 +20,69 @@ class BodyPart(Human):
 
 class Hand(BodyPart):
 
-	def __init__(self, location_x, location_y, device=None):
+	def __init__(self, location_x, location_y, is_dominant, device=None):
 		super().__init__(location_x, location_y, device)
 		self.location_x = location_x
 		self.location_y = location_y
+		self.is_dominant = is_dominant
 		self.device = device
 
 	'''Move interface with it, if it has one with it'''
 	def accept(self, motor_operator):
 		pass
+
+
+class Builder():
+	__metaclass__ = ABCMeta
+
+	@abstractmethod
+	def set_location_x(self, value):
+		pass
+
+	@abstractmethod
+	def set_location_y(self, value):
+		pass
+
+	@abstractmethod
+	def set_device(self, value):
+		pass
+
+	@abstractmethod
+	def set_is_dominant(self, value):
+		pass
+
+
+class HandBuilder(Builder):
+
+	def __init__(self):
+		self.hand = Hand()
+
+	def set_location_x(self, value):
+		self.hand.location_x = value
+		return self
+
+	def set_location_y(self, value):
+		self.hand.location_y = value
+		return self
+
+	def set_device(self, value):
+		self.hand.device = value
+		return self
+
+	def set_is_dominant(self, value):
+		self.hand.is_dominant = value
+		return self
+
+
+class HandBuilderDirector(BodyPart):
+	@staticmethod
+	def construct(location_x, location_y, device, is_dominant):
+		return HandBuilder().set_location_x(location_x).set_location_y(location_y).set_device(device).set_is_dominant(is_dominant)
+
 
 class Finger(Hand):
 
-	def __init__(self, location_x, location_y, device=None):
+	def __init__(self, location_x, location_y, device=None,):
 		super().__init__(location_x, location_y, device)
 		self.location_x = location_x
 		self.location_y = location_y
@@ -41,30 +93,30 @@ class Finger(Hand):
 		pass
 
 
-class Right_Hand(Hand):
+# class Right_Hand(Hand):
 	
-	def __init__(self, location_x, location_y, device=None):
-		super().__init__(location_x, location_y, device)
-		self.location_x = location_x
-		self.location_y = location_y
-		self.device = device
+# 	def __init__(self, location_x, location_y, device=None):
+# 		super().__init__(location_x, location_y, device)
+# 		self.location_x = location_x
+# 		self.location_y = location_y
+# 		self.device = device
 
-	#Change what is within reach of user's hand
-	def accept(self, motor_operator):
-		pass
+# 	#Change what is within reach of user's hand
+# 	def accept(self, motor_operator):
+# 		pass
 
 
-class Left_Hand(Hand):
+# class Left_Hand(Hand):
 
-	def __init__(self, location_x, location_y, device=None):
-		super().__init__(location_x, location_y, device)
-		self.location_x = location_x
-		self.location_y = location_y
-		self.device = device
+# 	def __init__(self, location_x, location_y, device=None):
+# 		super().__init__(location_x, location_y, device)
+# 		self.location_x = location_x
+# 		self.location_y = location_y
+# 		self.device = device
 
-	#Change what is within reach of user's hand
-	def accept(self, motor_operator):
-		pass
+# 	#Change what is within reach of user's hand
+# 	def accept(self, motor_operator):
+# 		pass
 
 
 class Eyes(BodyPart):
