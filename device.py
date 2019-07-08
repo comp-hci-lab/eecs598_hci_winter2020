@@ -14,8 +14,13 @@ class Mouse(Device):
 
 class Keyboard(Device):
 
-	def __init__(self, keyboard_file):
+	def __init__(self, location_x, location_y, keyboard_file):
 		self.keyboard_file = keyboard_file
+		
+		#Set keyboard location, should be static
+		self.location_x = location_x
+		self.location_y = location_y
+
 		#Change to multiple buttons array
 		self._keys = Button()
 		set_keys()

@@ -1,9 +1,25 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 
-class Human():
+class Human(ABC):
 
 	def __init__(self):
 		pass
+
+	@abstractmethod
+	def add_hands(self):
+		raise NotImplementedError("You should implement this!")
+
+	@abstractmethod
+	def add_eyes(self):
+		raise NotImplementedError("You should implement this!")
+
+	@abstractmethod
+	def add_ears(self):
+		raise NotImplementedError("You should implement this!")
+
+	@abstractmethod
+	def add_memory(self):
+		raise NotImplementedError("You should implement this!")
 
 
 class BodyPart(Human):
@@ -16,6 +32,18 @@ class BodyPart(Human):
 
 	def accept(self, motor_operator):
 		pass
+
+	def add_hands(self):
+		return Hand()
+
+	def add_eyes(self):
+		return Eyes()
+
+	def add_ears(self):
+		return Ears()
+
+	def add_memory(self):
+		return Memory()
 
 
 class Hand(BodyPart):
@@ -82,7 +110,7 @@ class HandBuilderDirector(BodyPart):
 
 class Finger(Hand):
 
-	def __init__(self, location_x, location_y, device=None,):
+	def __init__(self, location_x, location_y, device=None):
 		super().__init__(location_x, location_y, device)
 		self.location_x = location_x
 		self.location_y = location_y

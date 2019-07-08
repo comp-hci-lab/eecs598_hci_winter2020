@@ -90,7 +90,10 @@ class Motor(OperatorElement):
 
 	'''Make it so the correct action is taken based on the device held (i.e. button = push, key = press, NO_ITEM = grasp)'''
 	def execute(self, device):
-		pass
+		if device.type == "button":
+			'''Need to pass location of hand'''
+			device.press()
+
 
 
 class Operator(OperatorElement):
