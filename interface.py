@@ -1,7 +1,7 @@
 class Interface():
 
 	def __init__(self):
-		pass
+		pass 
 
 
 class Input_Widget(Interface):

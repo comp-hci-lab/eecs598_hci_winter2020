@@ -1,6 +1,6 @@
 class Device():
 
-	def __init__(self)
+	def __init__(self): 
 		pass
 
 
@@ -16,6 +16,7 @@ class Keyboard(Device):
 
 	def __init__(self, location_x, location_y, keyboard_file):
 		self.keyboard_file = keyboard_file
+		self.type = "keyboard"
 		
 		#Set keyboard location, should be static
 		self.location_x = location_x

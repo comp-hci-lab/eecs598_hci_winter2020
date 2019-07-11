@@ -1,6 +1,6 @@
 from abc import ABC, ABCMeta, abstractmethod
 
-class Human(ABC):
+class Human(ABC): 
 
 	def __init__(self):
 		pass

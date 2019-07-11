@@ -9,7 +9,7 @@ class OperatorElement():
 	def __init__(self):
 		pass
 
-	@abstractmethod
+	@abstractmethod 
 	def accept(self, visitor):
 		raise NotImplementedError(NOTIMPLEMENTED)
 
