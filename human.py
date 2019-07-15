@@ -1,6 +1,6 @@
 from abc import ABC, ABCMeta, abstractmethod
 
-class Human(ABC): 
+class Human(): 
 
 	def __init__(self):
 		pass
@@ -22,29 +22,51 @@ class Human(ABC):
 		raise NotImplementedError("You should implement this!")
 
 
-class BodyPart(Human):
+class BodyPart(ABC):
 
 	def __init__(self, location_x, location_y, device=None):
 		'''Initialize Body Part with a beginning location and a device that it is acting on (default None)'''
 		self.location_x = location_x
 		self.location_y = location_y
 		self.device = device
+		self.parent = None
+		self.children = None
+
+	@abstractmethod
+	def accept(self, motor_operator):
+		raise NotImplementedError("You should implement this!")
+
+	def set_parent(self, parent):
+		self.parent = parent
+		if not self.parent.children.contains(self):
+			self.parent.add_child(self)
+
+	def add_child(self, child):
+		if self.children is None:
+			self.children = []
+		self.children.append(child)
+
+		if child.parent != self:
+			if child.parent:
+				child.parent.remove_child(child)
+			child.parent = self 
+
+	def remove_child(self, child):
+		if self.children:
+			self.children.remove(child)
+		child.parent = None
+
+
+class Arm(BodyPart):
+
+	def __init__(self, location_x, location_y, is_dominant, device=None):
+		super().__init__(location_x, location_y, device)
+		self.location_x = location_x
+		self.location_y = location_y
+		self.device = device
 
 	def accept(self, motor_operator):
 		pass
-
-	def add_hands(self):
-		return Hand()
-
-	def add_eyes(self):
-		return Eyes()
-
-	def add_ears(self):
-		return Ears()
-
-	def add_memory(self):
-		return Memory()
-
 
 class Hand(BodyPart):
 
@@ -54,6 +76,7 @@ class Hand(BodyPart):
 		self.location_y = location_y
 		self.is_dominant = is_dominant
 		self.device = device
+		self.fingers = []
 
 	'''Move interface with it, if it has one with it'''
 	def accept(self, motor_operator):
@@ -108,7 +131,7 @@ class HandBuilderDirector(BodyPart):
 		return HandBuilder().set_location_x(location_x).set_location_y(location_y).set_device(device).set_is_dominant(is_dominant)
 
 
-class Finger(Hand):
+class Finger(BodyPart):
 
 	def __init__(self, location_x, location_y, device=None):
 		super().__init__(location_x, location_y, device)
@@ -172,7 +195,7 @@ class Ears(BodyPart):
 		self.device = device
 
 	'''Send information of what's heard as an auditory operator'''
-	def send(send, auditory_operator):
+	def send(self, auditory_operator):
 		pass
 
 class Memory(Human):
