@@ -82,17 +82,27 @@ class Cognitive(OperatorElement):
 
 class Motor(OperatorElement):
 
+	
 	def __init__(self):
-		pass
 
 	def accept(self, visitor):
 		visitor.visitMotor(self)
 
-	'''Make it so the correct action is taken based on the device held (i.e. button = push, key = press, NO_ITEM = grasp)'''
-	def execute(self, device):
-		if device.type == "button":
+	'''Motor operators can be either move, grasp, press'''
+	def execute(self, type, body_part, new_location_x, new_location_y):
+		if body_part.device == "button" and type == 'press':
 			'''Need to pass location of hand'''
-			device.press()
+			body_part.device.press()
+		else if body_part.device == None and type == 'grasp' and (body_part.location_x == new_location_x and body_part.location_y == new_location_y):
+			body_part.grasp(body_part.location_x, body_part.location_y)
+		else if body_part.device == None and type == 'grasp' and (body_part.location_x != new_location_x or body_part.location_y != new_location_y):
+			body_part.accept(new_location_x, new_location_y)
+			body_part.grasp(body_part.location_x, body_part.location_y)
+		else if type == 'move':
+			body_part.accept(new_location_x, new_location_y)
+			if body_part.device != None:
+				body_part.device.move(body_part.location_x, body_part.location_y, new_location_x, new_location_y)
+
 
 
 

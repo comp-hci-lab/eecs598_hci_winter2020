@@ -137,11 +137,17 @@ class Finger(BodyPart):
 		super().__init__(location_x, location_y, device)
 		self.location_x = location_x
 		self.location_y = location_y
-		self.device = device
+		self.device = devices
+		self.parent = None
+		self.children = None
 
 	'''Move interface with it, if it has one with it'''
-	def accept(self, motor_operator):
-		pass
+	def accept(self, new_location_x, new_location_y):
+		self.location_x = new_location_x
+		self.location_y = new_location_y
+
+	def grasp(self, location_x, location_y):
+		self.device = check_for_device(location_x, location_y)
 
 
 # class Right_Hand(Hand):
