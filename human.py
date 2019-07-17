@@ -185,12 +185,13 @@ class Eyes(BodyPart):
 		self.device = device
 
 	'''Change what is in the sight line of the user'''
-	def accept(self, motor_operator):
-		pass
+	def accept(self, new_location_x, new_location_y):
+		self.location_x = new_location_x
+		self.location_y = new_location_y
 
 	'''Send information of what's in sight line as a visual operator'''
-	def send(self, visual_operator):
-		pass
+	def send(self):
+		cogn_operator.accept(devices[location_x][location_y])
 
 class Ears(BodyPart):
 

@@ -35,8 +35,8 @@ class Visual(Perceptual):
 		pass
 
 	'''Send information to visual short term memory'''
-	def execute(self):
-		pass
+	def execute(self, eyes):
+		eyes.send()
 
 
 class Auditory(Perceptual):
@@ -72,8 +72,8 @@ class Cognitive(OperatorElement):
 
 
 	'''Send information to short term memory'''
-	def execute(self):
-		pass
+	def execute(self, item):
+		self.short_term_memory.addToMemory(item)
 		
 	'''Retrieve information from short term memory'''
 	def retrieve(self):
@@ -82,8 +82,8 @@ class Cognitive(OperatorElement):
 
 class Motor(OperatorElement):
 
-	
 	def __init__(self):
+		pass
 
 	def accept(self, visitor):
 		visitor.visitMotor(self)
