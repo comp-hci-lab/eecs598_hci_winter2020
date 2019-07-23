@@ -64,9 +64,19 @@ class Arm(BodyPart):
 		self.location_x = location_x
 		self.location_y = location_y
 		self.device = device
+		self.parent = None
+		self.children = None
 
-	def accept(self, motor_operator):
-		pass
+	'''Move arm and its children'''
+	def accept(self, new_location_x, new_location_y):
+		change_x = new_location_x - self.location_x
+		change_y = new_location_y - self.location_y
+		self.location_x = self.location_x + change_x
+		self.location_y = self.location_y + change_y
+
+		if self.children:
+			for child in self.children:
+				child.accept(child.location_x + change_x, child.location_y + change_y)
 
 class Hand(BodyPart):
 
@@ -76,11 +86,19 @@ class Hand(BodyPart):
 		self.location_y = location_y
 		self.is_dominant = is_dominant
 		self.device = device
-		self.fingers = []
+		self.parent = None
+		self.children = None
 
-	'''Move interface with it, if it has one with it'''
-	def accept(self, motor_operator):
-		pass
+	'''Move hand and its children'''
+	def accept(self, new_location_x, new_location_y):
+		change_x = new_location_x - self.location_x
+		change_y = new_location_y - self.location_y
+		self.location_x = self.location_x + change_x
+		self.location_y = self.location_y + change_y
+
+		if self.children:
+			for child in self.children:
+				child.accept(child.location_x + change_x, child.location_y + change_y)
 
 
 class Builder():
@@ -141,7 +159,7 @@ class Finger(BodyPart):
 		self.parent = None
 		self.children = None
 
-	'''Move interface with it, if it has one with it'''
+	'''Move finger'''
 	def accept(self, new_location_x, new_location_y):
 		self.location_x = new_location_x
 		self.location_y = new_location_y
@@ -191,7 +209,7 @@ class Eyes(BodyPart):
 
 	'''Send information of what's in sight line as a visual operator'''
 	def send(self):
-		cogn_operator.accept(devices[location_x][location_y])
+		cogn_operator.execute(devices[location_x][location_y])
 
 class Ears(BodyPart):
 
