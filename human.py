@@ -148,7 +148,6 @@ class HandBuilderDirector(BodyPart):
 	def construct(location_x, location_y, device, is_dominant):
 		return HandBuilder().set_location_x(location_x).set_location_y(location_y).set_device(device).set_is_dominant(is_dominant)
 
-
 class Finger(BodyPart):
 
 	def __init__(self, location_x, location_y, device=None):
@@ -166,33 +165,6 @@ class Finger(BodyPart):
 
 	def grasp(self, location_x, location_y):
 		self.device = check_for_device(location_x, location_y)
-
-
-# class Right_Hand(Hand):
-	
-# 	def __init__(self, location_x, location_y, device=None):
-# 		super().__init__(location_x, location_y, device)
-# 		self.location_x = location_x
-# 		self.location_y = location_y
-# 		self.device = device
-
-# 	#Change what is within reach of user's hand
-# 	def accept(self, motor_operator):
-# 		pass
-
-
-# class Left_Hand(Hand):
-
-# 	def __init__(self, location_x, location_y, device=None):
-# 		super().__init__(location_x, location_y, device)
-# 		self.location_x = location_x
-# 		self.location_y = location_y
-# 		self.device = device
-
-# 	#Change what is within reach of user's hand
-# 	def accept(self, motor_operator):
-# 		pass
-
 
 class Eyes(BodyPart):
 
@@ -220,8 +192,8 @@ class Ears(BodyPart):
 		self.device = device
 
 	'''Send information of what's heard as an auditory operator'''
-	def send(self, auditory_operator):
-		pass
+	def send(self):
+		cogn_operator.execute(devices[location_x][location_y])
 
 class Memory(Human):
 
@@ -266,41 +238,68 @@ class ShortTermMemory(Memory):
 		pass
 
 	def addToMemory(self, newPiece):
-		if self.newPiece in self.STM:
-				self.STM.remove(self.newPiece)
-				self.STM.insert(self.newPiece)
-		elif len(self.STM) > 3:
-			self.STM.append(self.newPiece)
-		else:
-			self.STM.pop()
-			self.STM.append(self.newPiece)
+		pass
 
 class VisualShortTermMemory(ShortTermMemory):
 
 	def __init__(self):
 		super().__init__()
+		self.vSTM = []
 
 	'''Modify accept to only take in visual operators'''
-	def accept(self, operator):
-		pass
+	def accept(self, item):
+		self.addToMemory(item)
+
+	def addToMemory(self, newPiece):
+		if newPiece in self.vSTM:
+				self.vSTM.remove(newPiece)
+				self.vSTM.insert(newPiece)
+		elif len(self.vSTM) > 3:
+			self.vSTM.append(newPiece)
+		else:
+			self.vSTM.pop()
+			self.vSTM.append(newPiece)
 		
 
 class AuditoryShortTermMemory(ShortTermMemory):
 
 	def __init__(self):
 		super().__init__()
+		self.aSTM = []
+
 
 	'''Modify accept to only take in auditory operators'''
-	def accept(self, operator):
-		pass
+	def accept(self, item):
+		self.addToMemory(item)
 
+	def addToMemory(self, newPiece):
+		if newPiece in self.aSTM:
+				self.aSTM.remove(newPiece)
+				self.aSTM.insert(newPiece)
+		elif len(self.aSTM) > 3:
+			self.aSTM.append(newPiece)
+		else:
+			self.aSTM.pop()
+			self.aSTM.append(newPiece)
+		
 
 class HapticShortTermMemory(ShortTermMemory):
 
 	def __init__(self):
 		super().__init__()
+		self.hSTM = []
 
 	'''Modify accept to only take in haptic operators'''
-	def accept(self, operator):
-		pass
+	def accept(self, item):
+		self.addToMemory(item)
+
+	def addToMemory(self, newPiece):
+		if newPiece in self.hSTM:
+				self.hSTM.remove(newPiece)
+				self.hSTM.insert(newPiece)
+		elif len(self.hSTM) > 3:
+			self.hSTM.append(newPiece)
+		else:
+			self.hSTM.pop()
+			self.hSTM.append(newPiece)
 		
