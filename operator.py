@@ -46,7 +46,7 @@ class Auditory(Perceptual):
 
 	'''Send information to auditory short term memory'''
 	def execute(self):
-		pass
+		ears.send()
 
 
 class Haptic(Perceptual):
@@ -70,9 +70,23 @@ class Cognitive(OperatorElement):
 	def accept(self, visitor):
 		visitor.visitCognitive(self)
 
+	'''Send motor operator?'''
+	def send(self):
+		pass
+
 
 	'''Send information to short term memory'''
-	def execute(self, item):
+	def execute(self, item, type):
+		'''Send to auditory STM'''
+		if type == 'a':
+
+		'''Send to visual STM'''
+		elif type == 'v':
+
+		'''send to haptic STM'''
+		elif type == 'h':
+
+
 		self.short_term_memory.addToMemory(item)
 		
 	'''Retrieve information from short term memory'''
@@ -80,9 +94,9 @@ class Cognitive(OperatorElement):
 		pass
 
 
-class Motor(OperatorElement):
+class MotorOperator(OperatorElement):
 
-	def __init__(self):
+	def __init__(self, type):
 		pass
 
 	def accept(self, visitor):
@@ -90,19 +104,7 @@ class Motor(OperatorElement):
 
 	'''Motor operators can be either move, grasp, press'''
 	def execute(self, type, body_part, new_location_x, new_location_y):
-		if body_part.device == "button" and type == 'press':
-			'''Need to pass location of hand'''
-			body_part.device.press()
-		else if body_part.device == None and type == 'grasp' and (body_part.location_x == new_location_x and body_part.location_y == new_location_y):
-			body_part.grasp(body_part.location_x, body_part.location_y)
-		else if body_part.device == None and type == 'grasp' and (body_part.location_x != new_location_x or body_part.location_y != new_location_y):
-			body_part.accept(new_location_x, new_location_y)
-			body_part.grasp(body_part.location_x, body_part.location_y)
-		else if type == 'move':
-			body_part.accept(new_location_x, new_location_y)
-			if body_part.device != None:
-				body_part.device.move(body_part.location_x, body_part.location_y, new_location_x, new_location_y)
-
+		body_part.accept(self)
 
 
 

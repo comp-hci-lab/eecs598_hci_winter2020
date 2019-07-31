@@ -69,14 +69,18 @@ class Arm(BodyPart):
 
 	'''Move arm and its children'''
 	def accept(self, new_location_x, new_location_y):
-		change_x = new_location_x - self.location_x
-		change_y = new_location_y - self.location_y
-		self.location_x = self.location_x + change_x
-		self.location_y = self.location_y + change_y
+		if motor_operator not isinstance(motor_operator, MotorOperator):
+			#TODO Throw an exception
+			pass
 
-		if self.children:
-			for child in self.children:
-				child.accept(child.location_x + change_x, child.location_y + change_y)
+		if motor_operator.type == 'move':
+			change_x = new_location_x - self.location_x
+			change_y = new_location_y - self.location_y
+			self.location_x = self.location_x + change_x
+			self.location_y = self.location_y + change_y
+			if self.children:
+				for child in self.children:
+					child.accept(child.location_x + change_x, child.location_y + change_y)
 
 class Hand(BodyPart):
 
@@ -90,16 +94,18 @@ class Hand(BodyPart):
 		self.children = None
 
 	'''Move hand and its children'''
-	def accept(self, new_location_x, new_location_y):
-		change_x = new_location_x - self.location_x
-		change_y = new_location_y - self.location_y
-		self.location_x = self.location_x + change_x
-		self.location_y = self.location_y + change_y
-
-		if self.children:
-			for child in self.children:
-				child.accept(child.location_x + change_x, child.location_y + change_y)
-
+	def accept(self, motor_operator):
+		if motor_operator not isinstance(motor_operator, MotorOperator):
+			#TODO Throw an exception
+			pass
+		if motor_operator.type == 'move':
+			change_x = new_location_x - self.location_x
+			change_y = new_location_y - self.location_y
+			self.location_x = self.location_x + change_x
+			self.location_y = self.location_y + change_y
+			if self.children:
+				for child in self.children:
+					child.accept(child.location_x + change_x, child.location_y + change_y)
 
 class Builder():
 	__metaclass__ = ABCMeta
@@ -200,9 +206,14 @@ class Eyes(BodyPart):
 		self.device = device
 
 	'''Change what is in the sight line of the user'''
-	def accept(self, new_location_x, new_location_y):
-		self.location_x = new_location_x
-		self.location_y = new_location_y
+	def accept(self, motor_operator):
+		if motor_operator not isinstance(motor_operator, MotorOperator):
+			#TODO Throw an exception
+			pass
+		if motor_operator.type == 'move':
+			self.location_x = new_location_x
+			self.location_y = new_location_y
+			send()
 
 	'''Send information of what's in sight line as a visual operator'''
 	def send(self):
@@ -256,7 +267,9 @@ class ShortTermMemory(Memory):
 
 	'''Operator is a visitor that is allowed or not to operate on the memory, acceptable types are perceptual or cognitive'''
 	def accept(self, operator):
-		pass
+		if operator not isinstance(operator, CognitiveOperator) and operator not isinstance(operator, PerceptualOperator):
+			#TODO Throw an exception
+			pass
 
 	'''Send out operator from memory, acceptable types are cognitive or motor'''
 	def send(self, operator):
