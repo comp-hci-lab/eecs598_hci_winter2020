@@ -7,7 +7,7 @@ class OperatorElement():
 	__metaclass__ = ABCMeta
 	
 	def __init__(self):
-		pass
+		self.duration = 0
 
 	@abstractmethod 
 	def accept(self, visitor):
@@ -96,51 +96,65 @@ class Cognitive(OperatorElement):
 
 class MotorOperator(OperatorElement):
 
-	def __init__(self, type):
-		pass
+	def __init__(self, body_part):
+		super(MotorOperator, self).__init__()
+		self.body_part = body_part
 
-	def accept(self, visitor):
-		visitor.visitMotor(self)
+	# def accept(self, visitor):
+	# 	visitor.visitMotor(self)
 
 	'''Motor operators can be either move, grasp, press'''
-	def execute(self, type, body_part, new_location_x, new_location_y):
-		body_part.accept(self)
-
-
-
-class Operator(OperatorElement):
-	def __init__(self):
-		self.elements = [Perceptual(), Cognitive(), Motor()]
-
-	def accept(self, visitor):
-		for element in self.elements:
-			element.accept(visitor)
-
 	def execute(self):
-		pass
+		self.body_part.accept(self)
 
-class OperatorElementVisitor():
-	__metaclass__ = ABCMeta
-	@abstractmethod
-	def visitPerceptual(self, element):
-		raise NotImplementedError(NOTIMPLEMENTED)
+	def visitFinger(self):
 
-	@abstractmethod
-	def visitCognitive(self, element):
-		raise NotImplementedError(NOTIMPLEMENTED)
+class Move(MotorOperator):
 
-	@abstractmethod
-	def visitMotor(self, element):
-		raise NotImplementedError(NOTIMPLEMENTED)
+	def __init__(self, body_part, new_location_x, new_location_y):
+		super(Move, self).__init__(body_part)
+		self.new_location_x = new_location_x
+		self.new_location_y = new_location_y
+
+	def visitFinger(self, finger):
+		# A = ((finger.location_x - new_location_x)**2 + (finger.location_y - new_location_y)**2)**.5
+		finger.press(new_location_y, new_location_y)
+		#TODO Compute time taken
 
 
-class OperatorElementDoVisitor(OperatorElementVisitor):
-	def visitPerceptual(self, perceptual):
-		pass
+# class Operator(OperatorElement):
+# 	def __init__(self):
+# 		self.elements = [Perceptual(), Cognitive(), Motor()]
 
-	def visitCognitive(self, cognitive):
-		pass
+# 	def accept(self, visitor):
+# 		for element in self.elements:
+# 			element.accept(visitor)
 
-	def visitMotor(self, motor):
-		pass
+# 	def execute(self):
+# 		pass
+
+# class OperatorElementVisitor():
+# 	__metaclass__ = ABCMeta
+# 	@abstractmethod
+# 	def visitPerceptual(self, element):
+# 		raise NotImplementedError(NOTIMPLEMENTED)
+
+# 	@abstractmethod
+# 	def visitCognitive(self, element):
+# 		raise NotImplementedError(NOTIMPLEMENTED)
+
+# 	@abstractmethod
+# 	def visitMotor(self, element):
+# 		raise NotImplementedError(NOTIMPLEMENTED)
+
+
+# class OperatorElementDoVisitor(OperatorElementVisitor):
+# 	def visitPerceptual(self, perceptual):
+# 		pass
+
+# 	def visitCognitive(self, cognitive):
+# 		pass
+
+# 	def visitMotor(self, motor):
+# 		pass
 

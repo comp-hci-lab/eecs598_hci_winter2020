@@ -21,16 +21,16 @@ class Human():
 	def add_memory(self):
 		raise NotImplementedError("You should implement this!")
 
-
 class BodyPart(ABC):
 
-	def __init__(self, location_x, location_y, device=None):
+	def __init__(self, location_x, location_y, device=None, handler):
 		'''Initialize Body Part with a beginning location and a device that it is acting on (default None)'''
 		self.location_x = location_x
 		self.location_y = location_y
 		self.device = device
 		self.parent = None
 		self.children = None
+		self.handler = handler
 
 	@abstractmethod
 	def accept(self, motor_operator):
@@ -59,8 +59,8 @@ class BodyPart(ABC):
 
 class Arm(BodyPart):
 
-	def __init__(self, location_x, location_y, is_dominant, device=None):
-		super().__init__(location_x, location_y, device)
+	def __init__(self, location_x, location_y, is_dominant, device=None, handler):
+		super().__init__(location_x, location_y, handler)
 		self.location_x = location_x
 		self.location_y = location_y
 		self.device = device
@@ -84,8 +84,8 @@ class Arm(BodyPart):
 
 class Hand(BodyPart):
 
-	def __init__(self, location_x, location_y, is_dominant, device=None):
-		super().__init__(location_x, location_y, device)
+	def __init__(self, location_x, location_y, is_dominant, device=None, handler):
+		super().__init__(location_x, location_y, device, handler)
 		self.location_x = location_x
 		self.location_y = location_y
 		self.is_dominant = is_dominant
@@ -156,8 +156,8 @@ class HandBuilderDirector(BodyPart):
 
 class Finger(BodyPart):
 
-	def __init__(self, location_x, location_y, device=None):
-		super().__init__(location_x, location_y, device)
+	def __init__(self, location_x, location_y, device=None, handler):
+		super().__init__(location_x, location_y, device, handler)
 		self.location_x = location_x
 		self.location_y = location_y
 		self.held_device = device
@@ -165,42 +165,49 @@ class Finger(BodyPart):
 		self.children = None
 	
 	def accept(self, motor_operator):
-		'''Move finger'''	
-		if motor_operator not isinstance(motor_operator, MotorOperator):
+		if not isinstance(motor_operator, MotorOperator):
 			#TODO Throw an exception
 			pass
+		motor_operator.visitFinger()
 
-		if motor_operator.type == 'press':
-			'''Check to see if button is at location, if present press'''
-			if self.location_x != motor_operator.new_location_x or self.location_y != motor_operator.new_location_y:
-				'''Perform a move operator if locations aren't same'''
-				self.location_x = motor_operator.new_location_x
-				self.location_y = motor_operator.new_location_y
-			if self.held_device == None:
-				device = check_for_device(motor_operator.new_location_x, motor_operator.new_location_y)
-			if device == None or device.type != 'button':
-				'''If no device or non button device found at location'''
-				pass
-			device.press()
-		else if self.held_device == None and type == 'grasp':
-			if self.location_x != new_location_x and self.location_y != new_location_y:
-				'''Perform a move operator if locations aren't same'''
-				self.location_x = motor_operator.new_location_x
-				self.location_y = motor_operator.new_location_y
-			grasp()
-		else if type == 'move':
-			self.location_x = motor_operator.new_location_x
-			self.location_y = motor_operator.new_location_y
-			if self.held_device != None:
-				self.held_device.move(self.location_x, self.location_y, new_location_x, new_location_y)
+	def move(self, new_location_x, new_location_y):
+		self.location_x = new_location_x
+		self.location_y = new_location_y
 
-	def grasp(self):
-		self.device = check_for_device(location_x, location_y)
+		move_event = MoveBodyPartEvent(self)
+		self.handler.handle(move_event)
+
+		# if motor_operator.type == 'press':
+		# 	'''Check to see if button is at location, if present press'''
+		# 	if self.location_x != motor_operator.new_location_x or self.location_y != motor_operator.new_location_y:
+		# 		'''Perform a move operator if locations aren't same'''
+		# 		self.location_x = motor_operator.new_location_x
+		# 		self.location_y = motor_operator.new_location_y
+		# 	if self.held_device == None:
+		# 		device = check_for_device(motor_operator.new_location_x, motor_operator.new_location_y)
+		# 	if device == None or device.type != 'button':
+		# 		'''If no device or non button device found at location'''
+		# 		pass
+		# 	device.press()
+		# else if self.held_device == None and type == 'grasp':
+		# 	if self.location_x != new_location_x and self.location_y != new_location_y:
+		# 		'''Perform a move operator if locations aren't same'''
+		# 		self.location_x = motor_operator.new_location_x
+		# 		self.location_y = motor_operator.new_location_y
+		# 	grasp()
+		# else if type == 'move':
+		# 	self.location_x = motor_operator.new_location_x
+		# 	self.location_y = motor_operator.new_location_y
+		# 	if self.held_device != None:
+		# 		self.held_device.move(self.location_x, self.location_y, new_location_x, new_location_y)
+
+	# def grasp(self):
+	# 	self.device = check_for_device(location_x, location_y)
 
 class Eyes(BodyPart):
 
-	def __init__(self, location_x, location_y, device=None):
-		super().__init__(location_x, location_y, device)
+	def __init__(self, location_x, location_y, device=None, handler):
+		super().__init__(location_x, location_y, device, handler)
 		self.location_x = location_x
 		self.location_y = location_y
 		self.device = device
@@ -221,8 +228,8 @@ class Eyes(BodyPart):
 
 class Ears(BodyPart):
 
-	def __init__(self, location_x, location_y, device=None):
-		super().__init__(location_x, location_y, device)
+	def __init__(self, location_x, location_y, device=None, handler):
+		super().__init__(location_x, location_y, device, handler)
 		self.location_x = location_x
 		self.location_y = location_y
 		self.device = device
