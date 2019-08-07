@@ -70,21 +70,24 @@ class Cognitive(OperatorElement):
 	def accept(self, visitor):
 		visitor.visitCognitive(self)
 
-	'''Send motor operator?'''
+	'''Create and send motor operator'''
 	def send(self):
 		pass
 
+	'''Receive Perceptual operator to be put into memory'''
+	def receive(self, percept_operator):
+		pass
 
 	'''Send information to short term memory'''
 	def execute(self, item, type):
-		'''Send to auditory STM'''
-		if type == 'a':
+		# '''Send to auditory STM'''
+		# if type == 'a':
 
-		'''Send to visual STM'''
-		elif type == 'v':
+		# '''Send to visual STM'''
+		# elif type == 'v':
 
-		'''send to haptic STM'''
-		elif type == 'h':
+		# '''send to haptic STM'''
+		# elif type == 'h':
 
 
 		self.short_term_memory.addToMemory(item)
@@ -108,6 +111,9 @@ class MotorOperator(OperatorElement):
 		self.body_part.accept(self)
 
 	def visitFinger(self):
+		pass
+	
+	def visitEye(self):
 
 class Move(MotorOperator):
 
@@ -118,43 +124,8 @@ class Move(MotorOperator):
 
 	def visitFinger(self, finger):
 		# A = ((finger.location_x - new_location_x)**2 + (finger.location_y - new_location_y)**2)**.5
-		finger.press(new_location_y, new_location_y)
+		finger.move(self.new_location_x, self.new_location_y)
 		#TODO Compute time taken
 
-
-# class Operator(OperatorElement):
-# 	def __init__(self):
-# 		self.elements = [Perceptual(), Cognitive(), Motor()]
-
-# 	def accept(self, visitor):
-# 		for element in self.elements:
-# 			element.accept(visitor)
-
-# 	def execute(self):
-# 		pass
-
-# class OperatorElementVisitor():
-# 	__metaclass__ = ABCMeta
-# 	@abstractmethod
-# 	def visitPerceptual(self, element):
-# 		raise NotImplementedError(NOTIMPLEMENTED)
-
-# 	@abstractmethod
-# 	def visitCognitive(self, element):
-# 		raise NotImplementedError(NOTIMPLEMENTED)
-
-# 	@abstractmethod
-# 	def visitMotor(self, element):
-# 		raise NotImplementedError(NOTIMPLEMENTED)
-
-
-# class OperatorElementDoVisitor(OperatorElementVisitor):
-# 	def visitPerceptual(self, perceptual):
-# 		pass
-
-# 	def visitCognitive(self, cognitive):
-# 		pass
-
-# 	def visitMotor(self, motor):
-# 		pass
-
+	def visitEye(self, eye):
+		eye.move(self.new_location_x, self.new_location_y)

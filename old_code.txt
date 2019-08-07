@@ -1,0 +1,72 @@
+		# if motor_operator.type == 'press':
+		# 	'''Check to see if button is at location, if present press'''
+		# 	if self.location_x != motor_operator.new_location_x or self.location_y != motor_operator.new_location_y:
+		# 		'''Perform a move operator if locations aren't same'''
+		# 		self.location_x = motor_operator.new_location_x
+		# 		self.location_y = motor_operator.new_location_y
+		# 	if self.held_device == None:
+		# 		device = check_for_device(motor_operator.new_location_x, motor_operator.new_location_y)
+		# 	if device == None or device.type != 'button':
+		# 		'''If no device or non button device found at location'''
+		# 		pass
+		# 	device.press()
+		# else if self.held_device == None and type == 'grasp':
+		# 	if self.location_x != new_location_x and self.location_y != new_location_y:
+		# 		'''Perform a move operator if locations aren't same'''
+		# 		self.location_x = motor_operator.new_location_x
+		# 		self.location_y = motor_operator.new_location_y
+		# 	grasp()
+		# else if type == 'move':
+		# 	self.location_x = motor_operator.new_location_x
+		# 	self.location_y = motor_operator.new_location_y
+		# 	if self.held_device != None:
+		# 		self.held_device.move(self.location_x, self.location_y, new_location_x, new_location_y)
+
+
+
+        # class Operator(OperatorElement):
+# 	def __init__(self):
+# 		self.elements = [Perceptual(), Cognitive(), Motor()]
+
+# 	def accept(self, visitor):
+# 		for element in self.elements:
+# 			element.accept(visitor)
+
+# 	def execute(self):
+# 		pass
+
+# class OperatorElementVisitor():
+# 	__metaclass__ = ABCMeta
+# 	@abstractmethod
+# 	def visitPerceptual(self, element):
+# 		raise NotImplementedError(NOTIMPLEMENTED)
+
+# 	@abstractmethod
+# 	def visitCognitive(self, element):
+# 		raise NotImplementedError(NOTIMPLEMENTED)
+
+# 	@abstractmethod
+# 	def visitMotor(self, element):
+# 		raise NotImplementedError(NOTIMPLEMENTED)
+
+
+# class OperatorElementDoVisitor(OperatorElementVisitor):
+# 	def visitPerceptual(self, perceptual):
+# 		pass
+
+# 	def visitCognitive(self, cognitive):
+# 		pass
+
+# 	def visitMotor(self, motor):
+# 		pass
+
+
+
+if motor_operator.type == 'move':
+			change_x = new_location_x - self.location_x
+			change_y = new_location_y - self.location_y
+			self.location_x = self.location_x + change_x
+			self.location_y = self.location_y + change_y
+			if self.children:
+				for child in self.children:
+					child.accept(child.location_x + change_x, child.location_y + change_y)

@@ -68,19 +68,18 @@ class Arm(BodyPart):
 		self.children = None
 
 	'''Move arm and its children'''
-	def accept(self, new_location_x, new_location_y):
+	def accept(self, motor_operator):
 		if motor_operator not isinstance(motor_operator, MotorOperator):
-			#TODO Throw an exception
-			pass
+			raise Exception('Operator is not a motor operator')
 
-		if motor_operator.type == 'move':
-			change_x = new_location_x - self.location_x
-			change_y = new_location_y - self.location_y
-			self.location_x = self.location_x + change_x
-			self.location_y = self.location_y + change_y
-			if self.children:
-				for child in self.children:
-					child.accept(child.location_x + change_x, child.location_y + change_y)
+		# if motor_operator.type == 'move':
+		# 	change_x = new_location_x - self.location_x
+		# 	change_y = new_location_y - self.location_y
+		# 	self.location_x = self.location_x + change_x
+		# 	self.location_y = self.location_y + change_y
+		# 	if self.children:
+		# 		for child in self.children:
+		# 			child.accept(child.location_x + change_x, child.location_y + change_y)
 
 class Hand(BodyPart):
 
@@ -166,61 +165,40 @@ class Finger(BodyPart):
 	
 	def accept(self, motor_operator):
 		if not isinstance(motor_operator, MotorOperator):
-			#TODO Throw an exception
-			pass
+			raise Exception('Operator is not a motor operator')
 		motor_operator.visitFinger()
 
 	def move(self, new_location_x, new_location_y):
+		move_event = MoveBodyPartEvent(self.location_x, self.location_y, new_location_x, new_location_y)
+		self.handler.handle(move_event)
+		
 		self.location_x = new_location_x
 		self.location_y = new_location_y
-
-		move_event = MoveBodyPartEvent(self)
-		self.handler.handle(move_event)
-
-		# if motor_operator.type == 'press':
-		# 	'''Check to see if button is at location, if present press'''
-		# 	if self.location_x != motor_operator.new_location_x or self.location_y != motor_operator.new_location_y:
-		# 		'''Perform a move operator if locations aren't same'''
-		# 		self.location_x = motor_operator.new_location_x
-		# 		self.location_y = motor_operator.new_location_y
-		# 	if self.held_device == None:
-		# 		device = check_for_device(motor_operator.new_location_x, motor_operator.new_location_y)
-		# 	if device == None or device.type != 'button':
-		# 		'''If no device or non button device found at location'''
-		# 		pass
-		# 	device.press()
-		# else if self.held_device == None and type == 'grasp':
-		# 	if self.location_x != new_location_x and self.location_y != new_location_y:
-		# 		'''Perform a move operator if locations aren't same'''
-		# 		self.location_x = motor_operator.new_location_x
-		# 		self.location_y = motor_operator.new_location_y
-		# 	grasp()
-		# else if type == 'move':
-		# 	self.location_x = motor_operator.new_location_x
-		# 	self.location_y = motor_operator.new_location_y
-		# 	if self.held_device != None:
-		# 		self.held_device.move(self.location_x, self.location_y, new_location_x, new_location_y)
 
 	# def grasp(self):
 	# 	self.device = check_for_device(location_x, location_y)
 
 class Eyes(BodyPart):
 
-	def __init__(self, location_x, location_y, device=None, handler):
-		super().__init__(location_x, location_y, device, handler)
+	def __init__(self, location_x, location_y, handler):
+		super().__init__(location_x, location_y, handler)
 		self.location_x = location_x
 		self.location_y = location_y
-		self.device = device
 
 	'''Change what is in the sight line of the user'''
 	def accept(self, motor_operator):
 		if motor_operator not isinstance(motor_operator, MotorOperator):
-			#TODO Throw an exception
-			pass
-		if motor_operator.type == 'move':
-			self.location_x = new_location_x
-			self.location_y = new_location_y
-			send()
+			raise Exception('Operator is not a motor operator')
+		motor_operator.visitEye()
+	
+	def move(self, new_location_x, new_location_y):
+		move_event = MoveBodyPartEvent(self.location_x, self.location_y, new_location_x, new_location_y)
+		self.handler.handle(move_event)
+
+		#TODO need to handle sending of visual information over the scan area as a perceputal operator
+
+		self.location_x = new_location_x
+		self.location_y = new_location_y
 
 	'''Send information of what's in sight line as a visual operator'''
 	def send(self):

@@ -1,10 +1,10 @@
 class Interface():
 
 	def __init__(self, devices):
-		pass
+		self.devices = []
 
 	def add_device(self, location_x, location_y, device_type):
-		devices[location_x] = {location_y: device_type} 
+		self.devices[location_x] = {location_y: device_type} 
 
 	def check_for_device(self, location_x, location_y):
 		if location_x in self.devices:
@@ -16,7 +16,7 @@ class Interface():
 	def move(self, original_x, original_y, new_location_x, new_location_y):
 		device_type = self.devices[original_x][original_y]
 		del self.devices[original_x][original_y]
-		add_device(new_location_x, new_location_y, device_type)
+		self.add_device(new_location_x, new_location_y, device_type)
 
 
 class Input_Widget(Interface):
@@ -40,6 +40,6 @@ class Button(Input_Widget):
 
 	'''Change state of device to pressed, if successful'''
 	def press(self, curr_x, curr_y):
-		if curr_x == location_x && curr_y == location_y:
+		if curr_x == self.location_x and curr_y == self.location_y:
 			self.state = True
 			'''Add pressing action to critical path/schedule chart'''
