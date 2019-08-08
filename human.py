@@ -177,6 +177,7 @@ class Finger(BodyPart):
 		
 	def visitButton(self, button):
 		button.press()
+		return True
 		
 
 	# def grasp(self):

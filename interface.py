@@ -1,31 +1,35 @@
-class Interface():
+class Interface(EventHandler):
 
-	def __init__(self, devices):
-		self.devices = {}
-
-	def add_device(self, location_x, location_y, device_type):
-		self.devices[location_x] = {location_y: device_type} 
-
-	def check_for_device(self, location_x, location_y):
-		if location_x in self.devices:
-			if location_y in self.devices[location_x]:
-				return self.devices[location_x][location_y]
-		return None
-
-
-	def move(self, original_x, original_y, new_location_x, new_location_y):
-		device_type = self.devices[original_x][original_y]
-		del self.devices[original_x][original_y]
-		self.add_device(new_location_x, new_location_y, device_type)
-
+    def __init__(self, top_left_x, top_left_y, width, height):
+        super().__init__(top_left_x, top_left_y, width, height)
 
 class Input_Widget(Interface):
 
-	def __init__(self, location_x, location_y):
-		self.location_x = location_x
-		self.location_y = location_y
+    def __init__(self, top_left_x, top_left_y, width, height):
+        super().__init__(top_left_x, top_left_y, width, height)
+
 
 class Output_Widget(Interface):
 
-	def  __init__(self):
-		pass
+    def __init__(self, top_left_x, top_left_y, width, height):
+        super().__init__(top_left_x, top_left_y, width, height)
+
+
+
+class Button(Input_Widget):
+
+    def __init__(self, top_left_x, top_left_y, width, height):
+		super().__init__(top_left_x, top_left_y, width, height)
+		self.state = False
+	
+	def handle(self, event):
+		return self.accept(event.body_part)
+
+	def accept(self, body_part):
+		return body_part.visitButton(self)
+
+	'''Change state of device to pressed, if successful'''
+	def press(self):
+		self.state = True
+		'''Add pressing action to critical path/schedule chart'''
+		'''Send output'''

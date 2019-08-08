@@ -1,19 +1,54 @@
 #TODO Implement as a singleton
-class BodyPartHandler():
-	def __init__(self):
-		self.devices = []
-
-	def register_device(self, device):
-		#TODO This function
-		self.devices.append(device)
-
+class EventHandler():
+	def __init__(self, top_left_x, top_left_y, width, height):
+		'''Top left (x,y) relative to parent'''
+		self.children = []
+		self.parent = None
+		self.top_left_x = top_left_x
+		self.top_left_y = top_left_y
+		self.width = width
+		self.height = height
 
 	def handle(self, event):
-		if isinstance(event, MoveBodyPartEvent):
-			#TODO Check for all of the available devices and see if the new location 
-			#of the move body part event body part is intersecting with that device 
-			#and then let the device handle that event
-			pass
+		for child in chidlren:
+			if intersects(event.x, event.y, child):
+				translated_event = translate(child, event)
+				return child.handle(translated_event)
+		return False
+			
+	def translate(self, child, event):
+		translated_event = event.copy()
+		translated_event.x = self.top_left_x - event.x 
+		translated_event.y = self.top_left_y - event.y 
+
+	def intersects(self, loc_x, loc_y, child):
+		if (loc_x > child.top_left_x and loc_x < child.top_left_x + child.width) and (loc_y < child.top_left_y and loc_y > child.top_left_y - child.height):
+			return True
+		else:
+			return False
+
+	def add_child(self, child):
+		if isinstance(child, BodyPartHandler):
+			if self.children is None:
+				self.children = []
+			self.children.append(child)
+
+			if child.parent != self:
+				if child.parent:
+					child.parent.remove_child(child)
+				child.parent = self 
+		else:
+			#TODO throw exception
+
+	def remove_child(self, child):
+		if self.children:
+			self.children.remove(child)
+		child.parent = None
+
+	def set_parent(self, parent):
+		self.parent = parent
+		if not self.parent.children.contains(self):
+			self.parent.add_child(self)
 
 class BodyPartEvent():
 	def __init__(self):
@@ -40,8 +75,10 @@ class MiniMap():
 
 
 class MoveBodyPartEvent():
-	def __init__(self, body_part):
+	def __init__(self, body_part, x, y):
 		self.body_part = body_part
+		self.x = x
+		self.y = y
 	
 	def move(self):
 		# if finger overlap with the correct location 
@@ -49,6 +86,5 @@ class MoveBodyPartEvent():
 		if miniMap.getComponent(self.body_part.locationX, self.body_part.locationY):
 			miniMap.deviceAccept(self.body_part.locationX, self.body_part.locationY)
 	
-
-
-	 
+	def copy(self):
+		return MoveBodyPartEvent(self.body_part, self.x, self.y)

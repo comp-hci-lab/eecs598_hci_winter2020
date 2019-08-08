@@ -1,7 +1,9 @@
-class Device():
+import model_util
 
-	def __init__(self): 
-		pass
+class Device(EventHandler):
+
+    def __init__(self, top_left_x, top_left_y, width, height):
+        super().__init__(top_left_x, top_left_y, width, height)
 
 
 class Mouse(Device):
@@ -41,19 +43,11 @@ class Screen(Device):
 	def __init__(self):
 		pass
 
-class Button(Device):
-
-	def __init__(self, location_x, location_y, type="button"):
-		self.location_x = location_x
-		self.location_y = location_y
-		self.type = type
-		self.state = False
-
-	def accept(self, handler):
-		handler.body_part.visitButton(self)
-
-	'''Change state of device to pressed, if successful'''
-	def press(self):
-		self.state = True
-		'''Add pressing action to critical path/schedule chart'''
-		'''Send output'''
+class TouchScreen(Screen):
+	
+	def __init__(self, input_widget):
+		self.input_widget = input_widget
+	
+	def handle(self, event):
+		if isinstance(event, InputEvent):
+			return self.input_widget.handle(event)
