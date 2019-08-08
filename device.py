@@ -40,3 +40,20 @@ class Screen(Device):
 
 	def __init__(self):
 		pass
+
+class Button(Device):
+
+	def __init__(self, location_x, location_y, type="button"):
+		self.location_x = location_x
+		self.location_y = location_y
+		self.type = type
+		self.state = False
+
+	def accept(self, handler):
+		handler.body_part.visitButton(self)
+
+	'''Change state of device to pressed, if successful'''
+	def press(self):
+		self.state = True
+		'''Add pressing action to critical path/schedule chart'''
+		'''Send output'''

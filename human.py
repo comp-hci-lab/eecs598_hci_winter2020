@@ -165,15 +165,19 @@ class Finger(BodyPart):
 	
 	def accept(self, motor_operator):
 		if not isinstance(motor_operator, MotorOperator):
-			raise Exception('Operator is not a motor operator')
-		motor_operator.visitFinger()
+			raise Exception('Operator is not a motor operator')  
+		motor_operator.visitFinger(self)
 
 	def move(self, new_location_x, new_location_y):
-		move_event = MoveBodyPartEvent(self.location_x, self.location_y, new_location_x, new_location_y)
-		self.handler.handle(move_event)
-		
 		self.location_x = new_location_x
 		self.location_y = new_location_y
+
+		move_event = MoveBodyPartEvent(self)
+		self.handler.handle(move_event)
+		
+	def visitButton(self, button):
+		button.press()
+		
 
 	# def grasp(self):
 	# 	self.device = check_for_device(location_x, location_y)

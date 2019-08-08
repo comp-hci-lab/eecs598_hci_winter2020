@@ -114,6 +114,7 @@ class MotorOperator(OperatorElement):
 		pass
 	
 	def visitEye(self):
+		pass
 
 class Move(MotorOperator):
 
