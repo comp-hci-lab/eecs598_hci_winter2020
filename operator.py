@@ -46,7 +46,8 @@ class Auditory(Perceptual):
 
 	'''Send information to auditory short term memory'''
 	def execute(self):
-		ears.send()
+		# ears.send()
+		pass
 
 
 class Haptic(Perceptual):
@@ -62,9 +63,10 @@ class Haptic(Perceptual):
 class Cognitive(OperatorElement):
 
 	def __init__(self):
-		#Have access to LTM/STM
-		self.long_term_memory = LongTermMemory()
-		self.short_term_memory = ShortTermMemory()
+		# #Have access to LTM/STM
+		# self.long_term_memory = LongTermMemory()
+		# self.short_term_memory = ShortTermMemory()
+		pass
 
 
 	def accept(self, visitor):
@@ -89,8 +91,8 @@ class Cognitive(OperatorElement):
 		# '''send to haptic STM'''
 		# elif type == 'h':
 
-
-		self.short_term_memory.addToMemory(item)
+		pass
+		# self.short_term_memory.addToMemory(item)
 		
 	'''Retrieve information from short term memory'''
 	def retrieve(self):

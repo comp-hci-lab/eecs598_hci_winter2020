@@ -10,9 +10,9 @@ class EventHandler():
 		self.height = height
 
 	def handle(self, event):
-		for child in chidlren:
-			if intersects(event.x, event.y, child):
-				translated_event = translate(child, event)
+		for child in self.children:
+			if self.intersects(event.x, event.y, child):
+				translated_event = self.translate(child, event)
 				return child.handle(translated_event)
 		return False
 			
@@ -28,7 +28,7 @@ class EventHandler():
 			return False
 
 	def add_child(self, child):
-		if isinstance(child, BodyPartHandler):
+		if isinstance(child, EventHandler):
 			if self.children is None:
 				self.children = []
 			self.children.append(child)
@@ -38,7 +38,7 @@ class EventHandler():
 					child.parent.remove_child(child)
 				child.parent = self 
 		else:
-			#TODO throw exception
+			raise Exception('Trying to add incorrect type of child')
 
 	def remove_child(self, child):
 		if self.children:
@@ -54,22 +54,22 @@ class BodyPartEvent():
 	def __init__(self):
 		pass
 
-class MiniMap():
+# class MiniMap():
 	
-	def __init__(self):
-		self.uiLayerMap = []
+# 	def __init__(self):
+# 		self.uiLayerMap = []
 		
-	def initDefaultMap(self):
-		#TODO init any default layout to map[]
-		#? how to represent the map
-		pass
+# 	def initDefaultMap(self):
+# 		#TODO init any default layout to map[]
+# 		#? how to represent the map
+# 		pass
 	
-	# getter for component on locationX/Y location
-	def getComponent(self, locationX, locationY):
-		return self.uiLayerMap[locationX][locationY]
+# 	# getter for component on locationX/Y location
+# 	def getComponent(self, locationX, locationY):
+# 		return self.uiLayerMap[locationX][locationY]
 
-	def deviceAccept(self, locationX, locationY):
-		self.uiLayerMap[locationX][locationY].accept()
+# 	def deviceAccept(self, locationX, locationY):
+# 		self.uiLayerMap[locationX][locationY].accept()
 
 
 
@@ -81,10 +81,11 @@ class MoveBodyPartEvent():
 		self.y = y
 	
 	def move(self):
+		pass
 		# if finger overlap with the correct location 
-		miniMap = MiniMap()
-		if miniMap.getComponent(self.body_part.locationX, self.body_part.locationY):
-			miniMap.deviceAccept(self.body_part.locationX, self.body_part.locationY)
+		# miniMap = MiniMap()
+		# if miniMap.getComponent(self.body_part.locationX, self.body_part.locationY):
+		# 	miniMap.deviceAccept(self.body_part.locationX, self.body_part.locationY)
 	
 	def copy(self):
 		return MoveBodyPartEvent(self.body_part, self.x, self.y)

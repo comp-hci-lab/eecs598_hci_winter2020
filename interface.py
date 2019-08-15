@@ -1,3 +1,4 @@
+
 class Interface(EventHandler):
 
     def __init__(self, top_left_x, top_left_y, width, height):
@@ -15,11 +16,9 @@ class Output_Widget(Interface):
         super().__init__(top_left_x, top_left_y, width, height)
 
 
-
 class Button(Input_Widget):
-
-    def __init__(self, top_left_x, top_left_y, width, height):
-		super().__init__(top_left_x, top_left_y, width, height)
+	def __init__(self, top_left_x, top_left_y, width, height):
+		super(Button, self).__init__(top_left_x, top_left_y, width, height)
 		self.state = False
 	
 	def handle(self, event):
