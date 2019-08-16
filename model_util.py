@@ -1,8 +1,9 @@
 #TODO Implement as a singleton
 class EventHandler():
-	def __init__(self, top_left_x, top_left_y, width, height):
+	def __init__(self, name, top_left_x, top_left_y, width, height):
 		'''Top left (x,y) relative to parent'''
-		self.children = []
+		self.children = {}
+		self.name = name
 		self.parent = None
 		self.top_left_x = top_left_x
 		self.top_left_y = top_left_y
@@ -27,11 +28,13 @@ class EventHandler():
 		else:
 			return False
 
-	def add_child(self, child):
+	def add_child(self, child, top_left_x, top_left_y):
 		if isinstance(child, EventHandler):
 			if self.children is None:
-				self.children = []
-			self.children.append(child)
+				self.children = {}
+			child.top_left_x = top_left_x
+			child.top_left_y = top_left_y
+			self.children[child.name] = child
 
 			if child.parent != self:
 				if child.parent:
@@ -42,7 +45,7 @@ class EventHandler():
 
 	def remove_child(self, child):
 		if self.children:
-			self.children.remove(child)
+			del self.children[child.name]
 		child.parent = None
 
 	def set_parent(self, parent):

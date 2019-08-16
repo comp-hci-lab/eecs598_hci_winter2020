@@ -3,19 +3,19 @@ from abc import ABCMeta, abstractmethod
 from interface import Button
 
 class Device(EventHandler):
+	def __init__(self, name, top_left_x, top_left_y, width, height):
+		super().__init__(name, top_left_x, top_left_y, width, height)
+		
+	def create_screen(self, top_left_x, top_left_y, width, height):
+		pass
 
-    def __init__(self, top_left_x, top_left_y, width, height):
-        super().__init__(top_left_x, top_left_y, width, height)
-
-	
-    def create_touchScreen(self, top_left_x, top_left_y, width, height):
-        return TouchScreen(top_left_x, top_left_y, width, height)
-
-
-class Screen(Device):
+class Screen(EventHandler):
 
 	def __init__(self):
 		pass
+	
+	def create_button(self, top_left_x, top_left_y, width, height):
+		return Button(top_left_x, top_left_y, width, height)
 
 class TouchScreen(Screen):
 	
@@ -25,8 +25,7 @@ class TouchScreen(Screen):
 		self.width = width
 		self.height = height
 	
-	def create_Button(self, top_left_x, top_left_y, width, height):
-		return Button(top_left_x, top_left_y, width, height)
+
 
 
 
@@ -36,7 +35,7 @@ class TouchScreen(Screen):
 		# 	return self.input_widget.handle(event)
  
 
-
+# class AbstractDeviceFactory:
 # class Mouse(Device):
 
 # 	def __init__(self):
@@ -69,5 +68,38 @@ class TouchScreen(Screen):
 # 		pass
 
 
+class DeviceBuilder:
+	__metaclass__ = ABCMeta
 
+	@abstractmethod
+	def __init__(self):
+		self.device = None
 
+	@abstractmethod
+	def set_screen(self, value):
+		pass
+
+class TouchScreenDevice(Device):
+	def __init__(self, top_left_x, top_left_y, width, height):
+		super().__init__(top_left_x, top_left_y, width, height)
+		
+	def create_screen(self, top_left_x, top_left_y, width, height):
+		return TouchScreen(top_left_x, top_left_y, width, height)
+
+class TouchScreenDeviceBuilder(DeviceBuilder):
+	
+	def __init__(self, top_left_x, top_left_y, width, height):
+		self.device = TouchScreenDevice(top_left_x, top_left_y, width, height)
+
+	def set_screen(self, value):
+		self.device.add_child(value)
+		return self
+	
+	def get_result(self):
+		return self.device
+
+class TouchScreenDeviceDirector:
+	@staticmethod
+	def construct(top_left_x, top_left_y, width, height):
+		touch_screen_device_builder = TouchScreenDeviceBuilder(top_left_x, top_left_y, width, height)
+		return touch_screen_device_builder.set_screen(touch_screen_device_builder.device.create_screen()).get_result()

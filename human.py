@@ -6,7 +6,7 @@ from environment import Plane, TestEnvironmentBuilderDirector
 class Human(): 
 
 	def __init__(self):
-		self.body_parts = []
+		self.body_parts = {}
 
 	@abstractmethod
 	def add_hands(self):
@@ -24,16 +24,16 @@ class Human():
 	def add_memory(self):
 		raise NotImplementedError("You should implement this!")
 
-	def add_body_part(self, value):
-		self.body_parts.append(value)
+	def add_body_part(self, body_part):
+		self.body_parts[body_part.name] = body_part
 
 class BodyPart(ABC):
 
-	def __init__(self, location_x, location_y, handler, device=None):
+	def __init__(self, name, location_x, location_y, handler=None):
 		'''Initialize Body Part with a beginning location and a device that it is acting on (default None)'''
+		self.name = name
 		self.location_x = location_x
 		self.location_y = location_y
-		self.device = device
 		self.parent = None
 		self.children = None
 		self.handler = handler
@@ -61,6 +61,18 @@ class BodyPart(ABC):
 		if self.children:
 			self.children.remove(child)
 		child.parent = None
+
+
+class AbstractBodyPartFactory:
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def create_finger(self):
+        pass
+
+class StandardBodyPartFactory(AbstractBodyPartFactory):
+    def create_finger(self, handler):
+        return Finger(0,0,handler)	
 
 
 # class Arm(BodyPart):
@@ -112,6 +124,8 @@ class BodyPart(ABC):
 # 		# 		for child in self.children:
 # 		# 			child.accept(child.location_x + change_x, child.location_y + change_y)
 # 		pass
+
+
 
 class Builder:
 	__metaclass__ = ABCMeta
@@ -174,9 +188,8 @@ class HumanBuilder(Builder):
 
 class TestHumanBuilderDirector:
 	@staticmethod
-	def construct(test_plane):
-		new_finger = Finger(0,0,test_plane)
-		return HumanBuilder().set_finger(new_finger)
+	def construct(body_part_factory, handler):
+		return HumanBuilder().set_finger(body_part_factory.create_finger(handler))
 
 # class HandBuilderDirector(BodyPart):
 	# @staticmethod
@@ -185,14 +198,8 @@ class TestHumanBuilderDirector:
 
 class Finger(BodyPart):
 
-	def __init__(self, location_x, location_y, handler, device=None):
-		super().__init__(location_x, location_y, device, handler)
-		self.location_x = location_x
-		self.location_y = location_y
-		self.held_device = device
-		self.parent = None
-		self.children = None
-		self.handler = handler
+	def __init__(self, name, location_x, location_y, handler=None):
+		super().__init__(name, location_x, location_y, handler)
 	
 	def accept(self, motor_operator):
 		if not isinstance(motor_operator, MotorOperator):

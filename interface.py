@@ -1,19 +1,19 @@
 
 class Interface(EventHandler):
 
-    def __init__(self, top_left_x, top_left_y, width, height):
-        super().__init__(top_left_x, top_left_y, width, height)
+    def __init__(self, name, top_left_x, top_left_y, width, height):
+        super().__init__(name,top_left_x, top_left_y, width, height)
 
 class Input_Widget(Interface):
 
-    def __init__(self, top_left_x, top_left_y, width, height):
-        super().__init__(top_left_x, top_left_y, width, height)
+    def __init__(self, name,top_left_x, top_left_y, width, height):
+        super().__init__(name,top_left_x, top_left_y, width, height)
 
 
 class Output_Widget(Interface):
 
-    def __init__(self, top_left_x, top_left_y, width, height):
-        super().__init__(top_left_x, top_left_y, width, height)
+    def __init__(self, name, top_left_x, top_left_y, width, height):
+        super().__init__(name,top_left_x, top_left_y, width, height)
 
 
 class Button(Input_Widget):

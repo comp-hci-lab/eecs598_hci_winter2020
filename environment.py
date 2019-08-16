@@ -1,17 +1,22 @@
-from human import TestHumanBuilderDirector
+from human import TestHumanBuilderDirector, StandardBodyPartFactory
+from device import TouchScreenDeviceDirector
 from model_util import EventHandler
 from abc import ABCMeta, abstractmethod
 
 class Plane(EventHandler):
     
-    def __init__(self, top_left_x, top_left_y, width, height):
-        super().__init__(top_left_x, top_left_y, width, height)
+    def __init__(self, name, top_left_x, top_left_y, width, height):
+        super().__init__(name, top_left_x, top_left_y, width, height)
 
 class PlaneBuilder:
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def set_size(self, x, y, width, height):
+        pass
+
+    @abstractmethod
+    def set_name(self, value):
         pass
 
     @abstractmethod
@@ -24,13 +29,17 @@ class PlaneBuilder:
 
 class SimplePlaneBuilder(PlaneBuilder):
     def __init__(self):
-        self.plane = Plane(0,0,0,0)
+        self.plane = Plane("simple_plane", 0,0,0,0)
     
     def set_size(self, x, y, width, height):
         self.plane.top_left_x = x
         self.plane.top_left_y = y
         self.plane.width = width
         self.plane.height = height      
+        return self
+
+    def set_name(self, value):
+        self.plane.name = value
         return self
 
     def set_device(self, value):
@@ -44,7 +53,8 @@ class SimplePlaneBuilder(PlaneBuilder):
 class TestSimplePlaneBuilderDirector:
     @staticmethod
     def construct(x, y, width, height):
-        return SimplePlaneBuilder().set_size(x, y, width, height).set_device().get_result()
+        device = TouchScreenDeviceDirector().construct(width/2, height/2, 25, 50)
+        return SimplePlaneBuilder().set_size(x, y, width, height).set_device(device).get_result()
 
 class Environment(EventHandler):
     
@@ -62,10 +72,6 @@ class EnvironmentBuilder:
 
     @abstractmethod
     def set_plane(self, value):
-        pass
-
-    @abstractmethod
-    def set_device(self, value):
         pass
 
     @abstractmethod
@@ -89,8 +95,10 @@ class SinglePlaneEnvironmentBuilder(EnvironmentBuilder):
         return self.environment
 
 
-class TestEnvironmentBuilderDirector:
+class TestEnvironmentDirector:
     @staticmethod
-    def construct(environment_width, environment_height, x, y, width, height):
-        return SinglePlaneEnvironmentBuilder(environment_width,environment_height).set_human(TestHumanBuilderDirector.construct(TestSimplePlaneBuilderDirector.construct(x,y,width,height))).set_plane(TestSimplePlaneBuilderDirector.construct(x,y,width,height)).get_result()
+    def construct(environment_width, environment_height):
+        body_part_factory = StandardBodyPartFactory()
+        environment_builder = SinglePlaneEnvironmentBuilder(environment_width,environment_height)
+        return environment_builder.set_human(TestHumanBuilderDirector.construct(body_part_factory, environment_builder.environment)).set_plane(TestSimplePlaneBuilderDirector.construct(0, 0, environment_width, environment_height)).get_result()
 
