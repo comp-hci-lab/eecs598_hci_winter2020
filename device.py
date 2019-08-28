@@ -92,7 +92,8 @@ class TouchScreenDeviceBuilder(DeviceBuilder):
 		self.device = TouchScreenDevice(top_left_x, top_left_y, width, height)
 
 	def set_screen(self, value):
-		self.device.add_child(value)
+		'''Setting to default locations'''
+		self.device.add_child(value, 0, 0)
 		return self
 	
 	def get_result(self):

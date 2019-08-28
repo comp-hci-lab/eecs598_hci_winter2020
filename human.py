@@ -1,7 +1,7 @@
 from abc import ABC, ABCMeta, abstractmethod
 from operator import MotorOperator
 from model_util	import MoveBodyPartEvent
-from environment import Plane, TestEnvironmentBuilderDirector
+from environment import Plane, TestEnvironmentDirector
 
 class Human(): 
 
@@ -64,15 +64,23 @@ class BodyPart(ABC):
 
 
 class AbstractBodyPartFactory:
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def create_finger(self):
-        pass
+	__metaclass__ = ABCMeta
+	
+	@abstractmethod
+	def create_finger(self):
+		pass
+		
+	@abstractmethod
+	def create_eyes(self):
+		pass
 
 class StandardBodyPartFactory(AbstractBodyPartFactory):
-    def create_finger(self, handler):
-        return Finger(0,0,handler)	
+	
+	def create_finger(self, handler):
+		return Finger(0,0,handler)	
+	
+	def create_eyes(self, handler):
+		return Eyes(0,0,handler)	
 
 
 # class Arm(BodyPart):
@@ -134,6 +142,9 @@ class Builder:
 	def set_finger(self, value):
 		pass
 	
+	@abstractmethod
+	def set_eyes(self, value):
+		pass
 
 
 	# @abstractmethod
@@ -158,6 +169,10 @@ class HumanBuilder(Builder):
 		self.human = Human()
 
 	def set_finger(self, value):
+		self.human.add_body_part(value)
+		return self
+
+	def set_eyes(self, value):
 		self.human.add_body_part(value)
 		return self
 	
@@ -189,7 +204,7 @@ class HumanBuilder(Builder):
 class TestHumanBuilderDirector:
 	@staticmethod
 	def construct(body_part_factory, handler):
-		return HumanBuilder().set_finger(body_part_factory.create_finger(handler))
+		return HumanBuilder().set_finger(body_part_factory.create_finger(handler)).set_eyes(body_part_factory.create_eyes(handler))
 
 # class HandBuilderDirector(BodyPart):
 	# @staticmethod
@@ -221,31 +236,33 @@ class Finger(BodyPart):
 	# def grasp(self):
 	# 	self.device = check_for_device(location_x, location_y)
 
-# class Eyes(BodyPart):
+class Eyes(BodyPart):
 
-# 	def __init__(self, location_x, location_y, handler):
-# 		super().__init__(location_x, location_y, handler)
-# 		self.location_x = location_x
-# 		self.location_y = location_y
+	def __init__(self, location_x, location_y, handler):
+		'''Eye location corresponds to what is present in the gaze/view of the eye at current moment in time'''
+		super().__init__(location_x, location_y, handler)
+		self.location_x = location_x
+		self.location_y = location_y
 
-# 	'''Change what is in the sight line of the user'''
-# 	def accept(self, motor_operator):
-# 		if not isinstance(motor_operator, MotorOperator):
-# 			raise Exception('Operator is not a motor operator')
-# 		motor_operator.visitEye()
+	def accept(self, motor_operator):
+		if not isinstance(motor_operator, MotorOperator):
+			raise Exception('Operator is not a motor operator')
+		motor_operator.visitEye()
 	
-# 	def move(self, new_location_x, new_location_y):
-# 		move_event = MoveBodyPartEvent(self.location_x, self.location_y, new_location_x, new_location_y)
-# 		self.handler.handle(move_event)
+	def move(self, new_location_x, new_location_y):
+		'''Change what is in the sight line of the user'''
+		self.location_x = new_location_x
+		self.location_y = new_location_y
 
-# 		#TODO need to handle sending of visual information over the scan area as a perceputal operator
 
-# 		self.location_x = new_location_x
-# 		self.location_y = new_location_y
+		move_event = MoveBodyPartEvent(self, new_location_x, new_location_y)
+		self.handler.handle(move_event)
 
-# 	'''Send information of what's in sight line as a visual operator'''
-# 	def send(self):
-# 		cogn_operator.execute(devices[location_x][location_y])
+		#TODO need to handle sending of visual information over the scan area as a perceputal operator
+
+	# '''Send information of what's in sight line as a visual operator'''
+	# def send(self):
+	# 	cogn_operator.execute(devices[location_x][location_y])
 
 # class Ears(BodyPart):
 

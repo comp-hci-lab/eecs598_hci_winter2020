@@ -28,6 +28,7 @@ class EventHandler():
 		else:
 			return False
 
+	#IS THE TOP_LEFT_X/Y PASSED DIFFERENT THAN SELF.TOP_LEFT_X/Y & IF SO HOW?
 	def add_child(self, child, top_left_x, top_left_y):
 		if isinstance(child, EventHandler):
 			if self.children is None:

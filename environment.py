@@ -43,7 +43,8 @@ class SimplePlaneBuilder(PlaneBuilder):
         return self
 
     def set_device(self, value):
-        self.plane.add_child(value)
+        '''Setting to default locations'''
+        self.plane.add_child(value, 0, 0)
         return self
 
     def get_result(self):
@@ -88,7 +89,8 @@ class SinglePlaneEnvironmentBuilder(EnvironmentBuilder):
         return self
 
     def set_plane(self, value):
-        self.environment.add_child(value)
+        '''Setting to default locations'''
+        self.environment.add_child(value, 0, 0)
         return self
     
     def get_result(self):
