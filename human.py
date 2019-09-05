@@ -241,8 +241,7 @@ class Eyes(BodyPart):
 	def __init__(self, location_x, location_y, handler):
 		'''Eye location corresponds to what is present in the gaze/view of the eye at current moment in time'''
 		super().__init__(location_x, location_y, handler)
-		self.location_x = location_x
-		self.location_y = location_y
+
 
 	def accept(self, motor_operator):
 		if not isinstance(motor_operator, MotorOperator):
