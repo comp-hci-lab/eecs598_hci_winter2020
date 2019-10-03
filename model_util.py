@@ -1,9 +1,13 @@
-#TODO Implement as a singleton
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
 class EventHandler():
-	def __init__(self, name, top_left_x, top_left_y, width, height):
-		'''Top left (x,y) relative to parent'''
+	''' This is a general purpose event handler. Any composite that has children and that wants to delegate event handling to those children should inherit from this class.'''
+	def __init__(self, name, label, top_left_x, top_left_y, width, height):
+		'''Initializes an event handler with (unique) name, label, no chilndren, and position. Top left (x,y) relative to parent.'''
 		self.children = {}
 		self.name = name
+		self.label  = label
 		self.parent = None
 		self.top_left_x = top_left_x
 		self.top_left_y = top_left_y
@@ -11,25 +15,31 @@ class EventHandler():
 		self.height = height
 
 	def handle(self, event):
-		for child in self.children:
-			if self.intersects(event.x, event.y, child):
-				translated_event = self.translate(child, event)
-				return child.handle(translated_event)
-		return False
+		''' Default handling of events--simply delegate to all children. Subclasses can choose to implement their own.'''
+		is_handled = False
+		for child in self.children.values():
+			if self.__intersects(event.x, event.y, child):
+				translated_event = self.__translate(child, event)
+				is_handled = child.handle(translated_event)
+				if is_handled:
+					break
+		return is_handled
 			
-	def translate(self, child, event):
+	def __translate(self, child, event):
+		''' Translates an event to childs coordinates.'''
 		translated_event = event.copy()
 		translated_event.x = self.top_left_x - event.x 
 		translated_event.y = self.top_left_y - event.y 
 
-	def intersects(self, loc_x, loc_y, child):
+	def __intersects(self, loc_x, loc_y, child):
+		''' Tests if a point intersects child.'''
 		if (loc_x > child.top_left_x and loc_x < child.top_left_x + child.width) and (loc_y < child.top_left_y and loc_y > child.top_left_y - child.height):
 			return True
 		else:
 			return False
 
-	#IS THE TOP_LEFT_X/Y PASSED DIFFERENT THAN SELF.TOP_LEFT_X/Y & IF SO HOW?
 	def add_child(self, child, top_left_x, top_left_y):
+		''' Adds a child to this event handler at a new location. Removes child from its old parent.'''
 		if isinstance(child, EventHandler):
 			if self.children is None:
 				self.children = {}
@@ -37,7 +47,7 @@ class EventHandler():
 			child.top_left_y = top_left_y
 			self.children[child.name] = child
 
-			if child.parent != self:
+			if not(child.parent == self):
 				if child.parent:
 					child.parent.remove_child(child)
 				child.parent = self 
@@ -45,51 +55,71 @@ class EventHandler():
 			raise Exception('Trying to add incorrect type of child')
 
 	def remove_child(self, child):
-		if self.children:
-			del self.children[child.name]
-		child.parent = None
+		''' Removes a child from the handler. It will no longer be handled by this  handler.'''
+		if child.parent == self:
+			if self.children:
+				del self.children[child.name]
+			child.parent = None
 
 	def set_parent(self, parent):
+		''' Sets a parent for this event handler. '''
 		self.parent = parent
 		if not self.parent.children.contains(self):
 			self.parent.add_child(self)
 
-class BodyPartEvent():
-	def __init__(self):
-		pass
+	def find_descendant(self, name):
+		''' Find and return a descendant, but with its position in the coordiantes of this event handler. '''
 
-# class MiniMap():
-	
-# 	def __init__(self):
-# 		self.uiLayerMap = []
+		descendant  = None
+
+		# First look in children. If there, then descendant is already relative to this handler.
+		if name in self.children:
+			descendant = self.children[name].copy()
 		
-# 	def initDefaultMap(self):
-# 		#TODO init any default layout to map[]
-# 		#? how to represent the map
-# 		pass
-	
-# 	# getter for component on locationX/Y location
-# 	def getComponent(self, locationX, locationY):
-# 		return self.uiLayerMap[locationX][locationY]
+		else:
+			# If descendant is not a child, keep searching recursively.
+			for child in self.children.values():
 
-# 	def deviceAccept(self, locationX, locationY):
-# 		self.uiLayerMap[locationX][locationY].accept()
+				descendant = child.find_descendant(name)
 
+				if descendant is not None:
+					# Found it. Translate relative to this handler and stop searching.
+					descendant.top_left_x += child.top_left_x
+					descendant.top_left_y += child.top_left_y
 
+					is_found = True
+					break
+			
+		return descendant
 
+	def copy(self):
+		''' Creates a shallow copy of self (i.e., no children are copied).'''
+		handler_copy = EventHandler(self.name, self.label, self.top_left_x, self.top_left_y, self.width, self.height)
 
-class MoveBodyPartEvent():
-	def __init__(self, body_part, x, y):
-		self.body_part = body_part
+		return handler_copy
+
+	def draw(self, ax, origin_x=0, origin_y=0):
+		''' Draws itself and all of its children.'''
+		ax.add_patch(patches.Rectangle((origin_x + self.top_left_x, origin_y + self.top_left_y), self.width, self.height, fill=False))
+
+		for child in self.children.values():
+			child.draw(ax, origin_x + self.top_left_x, origin_y + self.top_left_y)
+
+class Event():
+	def __init__(self, x, y):
 		self.x = x
 		self.y = y
 	
+	def copy(self):
+		return Event(self.x, self.y)
+
+class MoveBodyPartEvent(Event):
+	def __init__(self, body_part, x, y):
+		super(MoveBodyPartEvent, self).__init__(x, y)
+		self.body_part = body_part
+	
 	def move(self):
 		pass
-		# if finger overlap with the correct location 
-		# miniMap = MiniMap()
-		# if miniMap.getComponent(self.body_part.locationX, self.body_part.locationY):
-		# 	miniMap.deviceAccept(self.body_part.locationX, self.body_part.locationY)
 	
 	def copy(self):
 		return MoveBodyPartEvent(self.body_part, self.x, self.y)

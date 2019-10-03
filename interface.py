@@ -1,26 +1,28 @@
 from model_util import EventHandler
 from abc import ABCMeta, abstractmethod
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 class Interface(EventHandler):
 
-    def __init__(self, name, top_left_x, top_left_y, width, height):
-        super().__init__(name,top_left_x, top_left_y, width, height)
+    def __init__(self, name, label, top_left_x, top_left_y, width, height):
+        super(Interface, self).__init__(name, label,top_left_x, top_left_y, width, height)
 
 class Input_Widget(Interface):
 
-    def __init__(self, name,top_left_x, top_left_y, width, height):
-        super().__init__(name,top_left_x, top_left_y, width, height)
+    def __init__(self, name, label,top_left_x, top_left_y, width, height):
+        super(Input_Widget, self).__init__(name, label,top_left_x, top_left_y, width, height)
 
 
 class Output_Widget(Interface):
 
-    def __init__(self, name, top_left_x, top_left_y, width, height):
-        super().__init__(name,top_left_x, top_left_y, width, height)
+    def __init__(self, name, label, top_left_x, top_left_y, width, height):
+        super(Output_Widget, self).__init__(name, label,top_left_x, top_left_y, width, height)
 
 
 class Button(Input_Widget):
-	def __init__(self, top_left_x, top_left_y, width, height):
-		super(Button, self).__init__(top_left_x, top_left_y, width, height)
+	def __init__(self, name, label, top_left_x, top_left_y, width, height):
+		super(Button, self).__init__(name, label, top_left_x, top_left_y, width, height)
 		self.state = False
 	
 	def handle(self, event):
@@ -29,42 +31,16 @@ class Button(Input_Widget):
 	def accept(self, body_part):
 		return body_part.visitButton(self)
 
-	'''Change state of device to pressed, if successful'''
+	
 	def press(self):
+		'''Change state of device to pressed, if successful'''
 		self.state = True
-		'''Add pressing action to critical path/schedule chart'''
-		'''Send output'''
 
-	
-class InterfaceBuilder:
-	__metaclass__ = ABCMeta
+	def draw(self, ax, origin_x=0, origin_y=0):
+		''' In addition to rectangle it draws character text. '''
+		super().draw(ax, origin_x, origin_y)
 
-	@abstractmethod
-	def __init__(self):
-		self.interface = None
+		label_x = origin_x + self.top_left_x + self.width/2
+		label_y = origin_y + self.top_left_y + self.height/2
 
-	@abstractmethod
-	def add_button(self, value):
-		pass
-
-
-class GUIBuilder(InterfaceBuilder):
-
-	def __init__(self, name, top_left_x, top_left_y, width, height):
-		self.interface = Interface(name, top_left_x, top_left_y, width, height)
-
-	def add_button(self, value, top_left_x, top_left_y):
-		self.interface.add_child(value, top_left_x, top_left_y)
-
-	def get_result(self):
-		return self.interface
-
-class SingleButtonInterfaceDirector:
-	
-	@staticmethod
-	def construct(name, top_left_x, top_left_y, width, height, button_x, button_y, button_width, button_height):
-		guibuilder = GUIBuilder(name, top_left_x, top_left_y, width, height)
-
-		new_button = Button(button_x, button_y, button_width, button_height)
-
-		return guibuilder.add_button(new_button).get_result()
+		ax.annotate(self.name, (label_x, label_y), color='b', weight='bold', fontsize=6, ha='center', va='center')
