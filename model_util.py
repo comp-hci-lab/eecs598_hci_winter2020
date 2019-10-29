@@ -24,6 +24,29 @@ class EventHandler():
 				if is_handled:
 					break
 		return is_handled
+
+	def intersects(self, loc_x, loc_y):
+		''' Tests if a point intersects this handler.'''
+		if (loc_x > self.top_left_x and loc_x < self.top_left_x + self.width) and (loc_y < self.top_left_y and loc_y > self.top_left_y - self.height):
+			return True
+		else:
+			return False
+
+	def find_intersect(self, event):
+		''' Default way to find the intersecting child on top--simply delegate to all children. Subclasses can choose to implement their own.'''
+
+		intersecting_handler = None
+
+		for child in self.children.values():
+			if self.__intersects(event.x, event.y, child):
+				translated_event = self.__translate(child, event)
+				intersecting_handler = child.find_intersect(translated_event)
+				if intersecting_handler is None:
+					intersecting_handler = self
+				else:
+					# Found another descendant.
+					break
+		return intersecting_handler
 			
 	def __translate(self, child, event):
 		''' Translates an event to childs coordinates.'''
@@ -33,10 +56,7 @@ class EventHandler():
 
 	def __intersects(self, loc_x, loc_y, child):
 		''' Tests if a point intersects child.'''
-		if (loc_x > child.top_left_x and loc_x < child.top_left_x + child.width) and (loc_y < child.top_left_y and loc_y > child.top_left_y - child.height):
-			return True
-		else:
-			return False
+		return child.intersects(loc_x, loc_y)
 
 	def add_child(self, child, top_left_x, top_left_y):
 		''' Adds a child to this event handler at a new location. Removes child from its old parent.'''
