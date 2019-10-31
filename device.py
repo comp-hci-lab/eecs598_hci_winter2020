@@ -1,5 +1,5 @@
 from model_util import EventHandler
-from interface import Interface, Button
+from interface import Interface, Button, KeyboardKey, KeyboardDeleteKey, TextBox
 
 class Device(EventHandler):
 	def __init__(self, name, label, top_left_x, top_left_y, width, height):
@@ -48,9 +48,22 @@ class TouchScreenKeyboardDeviceDirector:
 		# Place a screen on the device.
 		screen = touch_screen_device_builder.device.create_screen('touchscreen', 'touchscreen', top_left_x + h_bezel, top_left_y + v_bezel, width - 2*h_bezel, height - 2*v_bezel)
 
+		default_textbox_margin = 10
+		default_textbox_width = screen.width - 2*default_textbox_margin
+		default_textbox_height = ((screen.width - 10) / 30) + 20
+		default_textbox_character_width = (screen.width - 10) / 30
+		default_textbox_character_height = (screen.width - 10) / 30
+
+		# Place a textbox with transciprion phrase at the top of the screen.
+		phrase_textbox = TextBox('phrase_textbox', '', default_textbox_margin, default_textbox_margin, default_textbox_width, default_textbox_height, default_textbox_character_width, default_textbox_character_height)
+		screen.add_child(phrase_textbox, default_textbox_margin, default_textbox_margin)
+
+		# Place a textbox with transciprion phrase at the top of the screen.
+		transcript_textbox = TextBox('transcription_textbox', '', default_textbox_margin, default_textbox_margin + phrase_textbox.top_left_y + phrase_textbox.height, default_textbox_width, default_textbox_height, default_textbox_character_width, default_textbox_character_height)
+		screen.add_child(transcript_textbox, default_textbox_margin, default_textbox_margin + phrase_textbox.top_left_y + phrase_textbox.height)
+
 		# Place a keyboard at the bottom third of the device.
 		keyboard = Interface('keyboard', 'keyboard', 0, 2*screen.height/3, screen.width, screen.height/3)
-
 		screen.add_child(keyboard, 0, 2*screen.height/3)
 
 		# Add keys.
@@ -76,7 +89,7 @@ class TouchScreenKeyboardDeviceDirector:
 			key_top_left_x = (keyboard.width - len(key_row)*key_width)/2
 
 			for key in key_row:
-				key_button = Button(key, key, key_top_left_x, key_top_left_y, key_width, key_height)
+				key_button = KeyboardKey(key, key, key_top_left_x, key_top_left_y, key_width, key_height, transcript_textbox)
 
 				keyboard.add_child(key_button, key_top_left_x, key_top_left_y)
 
@@ -84,7 +97,7 @@ class TouchScreenKeyboardDeviceDirector:
 
 			# If this is the  bottom row, add del key at the end.
 			if len(key_row) == 7:
-				del_button = Button('del', 'del', key_top_left_x, key_top_left_y, del_key_width, key_height)
+				del_button = KeyboardDeleteKey('del', 'del', key_top_left_x, key_top_left_y, del_key_width, key_height, transcript_textbox)
 				keyboard.add_child(del_button, key_top_left_x, key_top_left_y)				
 
 			key_top_left_y += default_key_height

@@ -1,3 +1,5 @@
+import math
+
 NOTIMPLEMENTED = "Needs to be implemented"
 
 class OperatorElement():	
@@ -10,14 +12,19 @@ class OperatorElement():
 		self.name = name
 		self.body_part = body_part
 		self.duration = 0
-		self.start = 0
-		self.end = 0
+		self.start_time = 0
+		self.end_time = 0
 
 	def execute(self):
 		'''
 		Executes this operator and returns its duration.
 		'''
+
 		return self.duration
+
+	def __execute(self):
+		''' Subclasses should implement this execution method to take advantage of the execution check. '''
+		pass
 
 	def __hash__(self):
 		return hash(self.name)
@@ -43,23 +50,24 @@ class Encode(Visual):
 		super(Encode, self).__init__(name, body_part)
 		self.target = target
 		self.K = 0.4
-		self.f =  1.53
+		self.f = {} # Counts of object being encoded.
+		self.f_total = 0.0 # Total of all object counts.
 		self.k = 0.006
 		self.t_prep = 0.200
 		self.initiate_saccade = False
 
-	def execute(self):
+	def __execute(self):
 		''' Executes encoding of a target, stores the target in the short term memory, and returns the duration  of the  operatoion. '''
 
 		# Convert the gaze into a vector with root at (self.body_part.location_x, self.body_part.location_y, 0).
 		current_x = self.body_part.fixation_x - self.body_part.location_x
 		current_y = self.body_part.fixation_y - self.body_part.location_y
-		current_z = self.body_part.distance
+		current_z = self.body_part.handler_distance
 
 		# Convert the target gaze into a vector with root at (self.body_part.location_x, self.body_part.location_y, 0).
-		target_x = self.target.location_x - self.body_part.location_x
-		target_y = self.target.location_y - self.body_part.location_y
-		target_z = self.body_part.distance
+		target_x = self.target.top_left_x + self.target.width/2 - self.body_part.location_x
+		target_y = self.target.top_left_y + self.target.height/2 - self.body_part.location_y
+		target_z = self.body_part.handler_distance
 
 		dot_product =  current_x*target_x + current_y*target_y + current_z*target_z
 		magnitude_current = math.sqrt(current_x**2 + current_y**2 + current_z**2)
@@ -67,9 +75,18 @@ class Encode(Visual):
 
 		theta = dot_product/(magnitude_current * magnitude_target)
 
-		epsilon = math.arccos(theta)
+		epsilon = math.acos(theta)
+
+		self.f_total += 1.0
+
+		if self.target.name not in self.f.keys():
+			self.f[self.target.name] = 0.0
+
+		self.f[self.target.name] = self.f[self.target.name] + 1.0
+
+		frequency = self.f[self.target.name] / self.f_total
 		
-		self.duration = self.K*(-1*math.log(self.f,2.0))*math.exp(self.k*epsilon)
+		self.duration = self.K*(-1*math.log(frequency))*math.exp(self.k*epsilon)
 
 		if self.duration > self.t_prep:
 			# It takes a long time to encode, so tell the system that we need to do a saccade to come closer to the target we are encoding.
@@ -106,50 +123,63 @@ class Cognitive(OperatorElement):
 
 class RetrieveTargetLocation(Cognitive):
 
-	def __init__(self, name, body_part, symbol):
-		super(RetrieveTargetLocation, self).__init__(name, body_part)
+	def __init__(self, name, ltm, vstm, symbol,  timestamp_offset):
+		super(RetrieveTargetLocation, self).__init__(name, ltm)
 		self.symbol = symbol
 		self.symbol_location = None
+		self.vstm = vstm
+
+		self.timestamp_offset = timestamp_offset
 
 	def execute(self):
-		self.duration = self.body_part.accept(self)
+		# First check if it vstm.
+		self.duration, self.symbol_location = self.vstm.accept(self)
+
+		# If not then check LTM.
+		if self.symbol_location is None:
+			self.duration, self.symbol_location = self.body_part.accept(self)
 
 		return self.duration
 
 	def visit_ltm(self, ltm):
-		self.duration, self.symbol_location = ltm.get(self.symbol, self.start)
+		self.duration, self.symbol_location = ltm.get(self.symbol, self.start_time + self.timestamp_offset)
 
-		return self.duration
+		return (self.duration, self.symbol_location)
 
 	def visit_stm(self, stm):
-		return stm.get(self.symbol)
+		self.duration, self.symbol_location = stm.get(self.symbol)
+
+		return (self.duration, self.symbol_location)
 
 class ActivateTargetLocation(Cognitive):
 
-	def __init__(self, name, body_part, symbol, symbol_location):
-		super(ActivateTargetLocation, self).__init__(name, body_part)
+	def __init__(self, name, ltm, vstm, symbol, symbol_location, timestamp_offset):
+		super(ActivateTargetLocation, self).__init__(name, ltm)
 		self.symbol = symbol
 		self.symbol_location = symbol_location
+		self.vstm = vstm
+
+		self.timestamp_offset = timestamp_offset
 
 	def execute(self):
 		self.duration = self.body_part.accept(self)
+		self.duration += self.vstm.accept(self)
 
 		return self.duration
 
 	def visit_ltm(self, ltm):
-		self.duration = ltm.put(self.symbol, self.symbol_location, self.start)
+		self.duration = ltm.put(self.symbol, self.symbol_location, self.start_time + self.timestamp_offset)
 
 		return self.duration
 
 	def visit_stm(self, stm):
-		return stm.get(self.symbol)
+		return stm.put(self.symbol, self.symbol_location)
 
 
 class MotorOperator(OperatorElement):
 
 	def __init__(self, name, body_part):
-		super(MotorOperator, self).__init__(name)
-		self.body_part = body_part
+		super(MotorOperator, self).__init__(name, body_part)
 
 	def visit_finger(self, finger):
 		pass

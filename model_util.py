@@ -27,13 +27,13 @@ class EventHandler():
 
 	def intersects(self, loc_x, loc_y):
 		''' Tests if a point intersects this handler.'''
-		if (loc_x > self.top_left_x and loc_x < self.top_left_x + self.width) and (loc_y < self.top_left_y and loc_y > self.top_left_y - self.height):
+		if (loc_x > self.top_left_x and loc_x < self.top_left_x + self.width) and (loc_y > self.top_left_y and loc_y < self.top_left_y + self.height):
 			return True
 		else:
 			return False
 
 	def find_intersect(self, event):
-		''' Default way to find the intersecting child on top--simply delegate to all children. Subclasses can choose to implement their own.'''
+		''' Default way to find the intersecting child on top--simply delegate to all children. Retunrs intersecting handler in coordinates relative to the self. Subclasses can choose to implement their own.'''
 
 		intersecting_handler = None
 
@@ -41,18 +41,26 @@ class EventHandler():
 			if self.__intersects(event.x, event.y, child):
 				translated_event = self.__translate(child, event)
 				intersecting_handler = child.find_intersect(translated_event)
-				if intersecting_handler is None:
-					intersecting_handler = self
-				else:
-					# Found another descendant.
-					break
+
+				if intersecting_handler is not None:
+					# Translate.
+					intersecting_handler.top_left_x += self.top_left_x
+					intersecting_handler.top_left_y += self.top_left_y
+
+					break;
+
+		if intersecting_handler is None:
+			intersecting_handler = self.copy()
+				
 		return intersecting_handler
 			
 	def __translate(self, child, event):
-		''' Translates an event to childs coordinates.'''
+		''' Translates an event to child's coordinates.'''
 		translated_event = event.copy()
-		translated_event.x = self.top_left_x - event.x 
-		translated_event.y = self.top_left_y - event.y 
+		translated_event.x = event.x - child.top_left_x
+		translated_event.y = event.y - child.top_left_y
+
+		return translated_event
 
 	def __intersects(self, loc_x, loc_y, child):
 		''' Tests if a point intersects child.'''
@@ -81,6 +89,12 @@ class EventHandler():
 				del self.children[child.name]
 			child.parent = None
 
+	def remove_all_children(self):
+		''' Removes all children from the handler. None of them will be handled by this handler any longer.'''
+
+		for child_key in list(self.children.keys()):
+			self.remove_child(self.children[child_key])
+
 	def set_parent(self, parent):
 		''' Sets a parent for this event handler. '''
 		self.parent = parent
@@ -103,11 +117,33 @@ class EventHandler():
 				descendant = child.find_descendant(name)
 
 				if descendant is not None:
-					# Found it. Translate relative to this handler and stop searching.
-					descendant.top_left_x += child.top_left_x
-					descendant.top_left_y += child.top_left_y
+					# Found it.
+					break
 
-					is_found = True
+		if descendant is not None:
+			# Translate relative to this handler and stop searching.
+			descendant.top_left_x += self.top_left_x
+			descendant.top_left_y += self.top_left_y
+			
+		return descendant
+
+	def get_descendant(self, name):
+		''' Find and return a descendant, but with its original position in its parent handler. '''
+
+		descendant  = None
+
+		# First look in children. If there, then descendant is already relative to this handler.
+		if name in self.children:
+			descendant = self.children[name]
+		
+		else:
+			# If descendant is not a child, keep searching recursively.
+			for child in self.children.values():
+
+				descendant = child.get_descendant(name)
+
+				if descendant is not None:
+					# Found it.
 					break
 			
 		return descendant
