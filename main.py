@@ -18,15 +18,22 @@ def main(argv):
 	device = TouchScreenKeyboardDeviceDirector.construct('device', 'device', 0, 0, 960, 2160, 30, 270)
 
 	# Create a human and associate it with the device, so that the device knows about any body part movements.
-	human = Human(device)
+	#human = Human.create_novice(device)
+	human = Human.create_expert(device)
 
-	# Create a thumb on the human and place it over the space button to begin with.
+	phrase_textbox = device.find_descendant('phrase_textbox')
 	space_key = device.find_descendant(' ')
 
-	human.create_finger('thumb', space_key.top_left_x + space_key.width/2, space_key.top_left_y + space_key.height/2)
-	human.create_eyes('eyes', space_key.top_left_x + space_key.width/2, space_key.top_left_y + space_key.height/2, 1000)
-	human.create_ltm('ltm') # Long term memory
-	human.create_stm('vstm') # Short term memory
+	transcription_textbox = device.find_descendant('transcription_textbox')
+
+	# Reset the thumb to the space before each phrase.
+	human.body_parts['thumb'].location_x = space_key.top_left_x + space_key.width/2
+	human.body_parts['thumb'].location_y = space_key.top_left_y + space_key.height/2
+
+	# Reset the eyes to the phrase text box.
+	human.body_parts['eyes'].fixation_x = phrase_textbox.top_left_x + phrase_textbox.width/2
+	human.body_parts['eyes'].fixation_y = phrase_textbox.top_left_y + phrase_textbox.height/2
+
 
 	#  Visualize the device interface and the position of the thumb.
 	device_plot = plt.figure()
@@ -56,7 +63,7 @@ def main(argv):
 	with open('data/phrases.txt') as phrase_set:
 		for phrase in phrase_set:
 
-			phrase_typing_timestamps.append(total_duration) # start time for this phrase.
+			phrase_typing_timestamps.append(total_duration/(60.0*1000.0)) # start time for this phrase since the fist time typing in minutes.
 
 			phrase = phrase.lower().rstrip()
 
@@ -88,8 +95,17 @@ def main(argv):
 
 			phrase_typing_speeds.append(current_speed_words_per_minute)
 
-			if len(phrase_typing_speeds) % 10 ==  0:
+			if len(phrase_typing_speeds) % 250 ==  0:
 				human.draw_schedule_graph(phrase, schedule_chart)
+
+				#  Visualize the typing speeds over time.
+				plt.scatter(phrase_typing_timestamps, phrase_typing_speeds)
+				plt.title('Typing speeds over time')
+				plt.xlabel('Time (min)')
+				plt.ylabel('Speed (WPM)')
+
+				plt.show(block=True)
+				plt.close()
 
 	# Convert total_duration from milliseconds to seconds.
 	total_duration /= 1000.0

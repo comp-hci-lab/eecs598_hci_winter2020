@@ -2,6 +2,8 @@ import math
 
 NOTIMPLEMENTED = "Needs to be implemented"
 
+ # Total of all object counts.
+
 class OperatorElement():	
 	'''All operators use this as base.'''
 	def __init__(self, name, body_part):
@@ -46,17 +48,18 @@ class Visual(Perceptual):
 
 class Encode(Visual):
 
+	f_total = 1.0
+
 	def __init__(self, name, body_part, target):
 		super(Encode, self).__init__(name, body_part)
 		self.target = target
 		self.K = 0.4
 		self.f = {} # Counts of object being encoded.
-		self.f_total = 0.0 # Total of all object counts.
 		self.k = 0.006
-		self.t_prep = 0.200
+		self.t_prep = 200
 		self.initiate_saccade = False
 
-	def __execute(self):
+	def execute(self):
 		''' Executes encoding of a target, stores the target in the short term memory, and returns the duration  of the  operatoion. '''
 
 		# Convert the gaze into a vector with root at (self.body_part.location_x, self.body_part.location_y, 0).

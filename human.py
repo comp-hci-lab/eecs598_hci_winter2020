@@ -4,10 +4,10 @@ from operators import OperatorElement, Perceptual, Encode, Cognitive, RetrieveTa
 import networkx as nx
 import math
 import numpy as np
+from string import ascii_lowercase
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-
 
 class Human(): 
 	''' This class represents a human with both cognition and body. In Assignment 2, this will be an abstraction where most complex aspects of the human will be removed, except body parts. '''
@@ -35,16 +35,16 @@ class Human():
 		self.add_body_part(eyes)
 		return eyes
 
-	def create_ltm(self, name):
+	def create_ltm(self, name, store={}, activations = {}):
 		'''  Creates and adds a new figure to  the human. '''
-		ltm = LongTermMemory(name)
+		ltm = LongTermMemory(name, store, activations)
 		self.add_body_part(ltm)
 
 		return ltm
 
 	def create_stm(self, name):
 		'''  Creates and adds a new figure to  the human. '''
-		stm = ShortTermMemory(name)
+		stm = ShortTermMemory(name, storage_capacity = 20)
 		self.add_body_part(stm)
 		
 		return stm
@@ -135,8 +135,6 @@ class Human():
 						
 						self.__draw_all()
 
-						visual_search_duration += move_eyes.duration
-
 						schedule_chart.add_edge(encode_operator, move_eyes)
 
 						if previous_motor_eyes_operator is not None:
@@ -209,7 +207,7 @@ class Human():
 
 				# Before execution retrieval we need to update the current critical path timestamp. The timestamp would be the end time of the previous cognitive operator.
 				self.compute_duration(schedule_chart)
-				self.draw_schedule_graph(phrase, schedule_chart)
+				#self.draw_schedule_graph(phrase, schedule_chart)
 
 				retrieve_target_location.start_time = previous_cognitive_operator.end_time
 
@@ -231,11 +229,20 @@ class Human():
 					if intersecting_handler is not None:
 						# This should always be true; otherwise, we have gone out of the environment.
 						encode_operator = Encode(str(operator_idx) + '_encode:' + intersecting_handler.name, self.body_parts['eyes'], intersecting_handler)
-						schedule_chart.add_node(encode_operator)
 						operator_idx += 1
+
+						# If we find before the any  saccade can start, then  simply skip scanning.
+						if retrieve_target_location.duration < encode_operator.t_prep:
+							break
 
 						encode_operator.execute()
 						visual_search_duration += encode_operator.duration
+
+						if visual_search_duration >= retrieve_target_location.duration:
+							# if the encoding is taking too long, just end it.
+							break
+
+						schedule_chart.add_node(encode_operator)
 
 						schedule_chart.add_edge(previous_cognitive_operator, encode_operator)
 						schedule_chart.add_edge(previous_perceptual_operator, encode_operator)
@@ -359,7 +366,7 @@ class Human():
 						schedule_chart.add_edge(previous_cognitive_retrieve_operator, retrieve_target_location)
 					
 					schedule_chart.add_edge(retrieve_target_location, move_eyes)
-					schedule_chart.add_edge(move_eyes, move_finger)
+					schedule_chart.add_edge(retrieve_target_location, move_finger)
 
 					if previous_motor_eyes_operator is not None:
 						schedule_chart.add_edge(previous_motor_eyes_operator, move_eyes)
@@ -369,9 +376,76 @@ class Human():
 
 					previous_motor_eyes_operator = move_eyes
 
+					# Find which target we intersect with.
+					intersecting_event = Event(self.body_parts['eyes'].fixation_x, self.body_parts['eyes'].fixation_y)
+					intersecting_handler = self.handler.find_intersect(intersecting_event)
+
+					if intersecting_handler is not None:
+
+						encode_operator = None
+
+						while encode_operator is None or encode_operator.initiate_saccade:
+							# This should always be true; otherwise, we have gone out of the environment.
+							encode_operator = Encode(str(operator_idx) + '_encode:' + intersecting_handler.name, self.body_parts['eyes'], intersecting_handler)
+							schedule_chart.add_node(encode_operator)
+							operator_idx += 1
+
+							encode_operator.execute()
+
+							if previous_perceptual_operator is not None:
+								schedule_chart.add_edge(previous_perceptual_operator, encode_operator)
+
+							if previous_motor_eyes_operator is not None:
+								schedule_chart.add_edge(previous_motor_eyes_operator, encode_operator)
+
+							previous_perceptual_operator = encode_operator
+
+							if encode_operator.initiate_saccade:
+								# We did not encode the handler under the fixation point in time and we need another saccade.
+								move_eyes = Move(str(operator_idx) + '_motor_eyes:' + intersecting_handler.name, self.body_parts['eyes'], intersecting_handler)
+								schedule_chart.add_node(move_eyes)
+								operator_idx += 1
+
+								move_eyes.execute()
+								
+								self.__draw_all()
+
+								visual_search_duration += move_eyes.duration
+
+								schedule_chart.add_edge(encode_operator, move_eyes)
+
+								if previous_motor_eyes_operator is not None:
+									schedule_chart.add_edge(previous_motor_eyes_operator, move_eyes)
+
+								previous_motor_eyes_operator = move_eyes
+
+							else:
+								# We encoded the handler in time. Update VSTM and LTM.
+								activate_target_location = ActivateTargetLocation(str(operator_idx) + '_activate:' + encode_operator.target.name, self.body_parts['ltm'], self.body_parts['vstm'], encode_operator.target.name, encode_operator.target, self.timestamp_offset)
+
+								self.compute_duration(schedule_chart)
+								#self.draw_schedule_graph(phrase, schedule_chart)
+
+								schedule_chart.add_node(activate_target_location)
+								operator_idx += 1
+
+								activate_target_location.start_time = encode_operator.end_time
+
+								activate_target_location.execute()
+
+								if previous_cognitive_operator  is not None:
+									schedule_chart.add_edge(previous_cognitive_operator, activate_target_location)
+
+								schedule_chart.add_edge(encode_operator, activate_target_location)
+
+								previous_cognitive_operator = activate_target_location
+
 				move_finger.execute()
 
 				self.__draw_all()
+
+				if previous_perceptual_operator is not None:
+						schedule_chart.add_edge(previous_perceptual_operator, move_finger)
 
 				if previous_cognitive_operator is not None:
 						schedule_chart.add_edge(previous_cognitive_operator, move_finger)
@@ -490,30 +564,63 @@ class Human():
 		ax1.yaxis.set_ticks(range(0, 7*LAYER_HEIGHT, 1000))
 		
 		plt.ylim((0, 7*LAYER_HEIGHT))
-		plt.xlim((0, int(max_end_time)))
+		plt.xlim((0, int(max_end_time) + 1000))
 		ax1.set_ylim(ax1.get_ylim()[::-1]) 
 
 		plt.show(block=True)
 		plt.close()
 
 	def __draw_all(self):
-		pass
-		#  Visualize the device interface and the position of the thumb.
-		# device_plot = plt.figure()
-		# ax1 = device_plot.add_subplot(111, aspect='equal')
-		# ax1.xaxis.set_ticks(range(self.handler.top_left_x, self.handler.width, 200))
-		# ax1.yaxis.set_ticks(range(self.handler.top_left_y, self.handler.height, 200))
+		if False:
+			#  Visualize the device interface and the position of the thumb.
+			device_plot = plt.figure()
+			ax1 = device_plot.add_subplot(111, aspect='equal')
+			ax1.xaxis.set_ticks(range(self.handler.top_left_x, self.handler.width, 200))
+			ax1.yaxis.set_ticks(range(self.handler.top_left_y, self.handler.height, 200))
 
-		# self.handler.draw(ax1)
-		# self.draw(ax1)
+			self.handler.draw(ax1)
+			self.draw(ax1)
+			
+			plt.ylim((0, self.handler.height))
+			plt.xlim((0, self.handler.width))
+			ax1.set_ylim(ax1.get_ylim()[::-1]) 
+			ax1.xaxis.tick_top()
+
+			plt.show(block=True)
+			plt.close()
+
+	@staticmethod
+	def create_novice(environment):
+		human = Human(environment)
+		human.create_finger('thumb', 0, 0)
+		human.create_eyes('eyes', 0, 0, 1000)
+		human.create_ltm('ltm') # Long term memory
+		human.create_stm('vstm') # Short term memory
+
+		return human
+
+	@staticmethod
+	def create_expert(environment):
+		human = Human(environment)
+		human.create_finger('thumb', 0, 0)
+		human.create_eyes('eyes', 0, 0, 10000)
+
+		# Attach expert LTM.
+		expert_store = {}
+		expert_ltm_activations = {}
+
+		expert_ltm_activations[' '] = (0.0,10000.0)
+		expert_store[' '] = environment.find_descendant(' ')
+
+		for c in ascii_lowercase:
+			expert_ltm_activations[c] = (0.0,10000.0)
+			expert_store[c] = environment.find_descendant(c)
 		
-		# plt.ylim((0, self.handler.height))
-		# plt.xlim((0, self.handler.width))
-		# ax1.set_ylim(ax1.get_ylim()[::-1]) 
-		# ax1.xaxis.tick_top()
+		human.create_ltm('ltm', store=expert_store, activations=expert_ltm_activations) # Long term memory
 
-		# plt.show(block=True)
-		# plt.close()
+		human.create_stm('vstm') # Short term memory
+
+		return human
 
 class BodyPart(ABC):
 	''' This is an abstract class represeting a body part (e.g., fingers, eyes). Body parts can have related body parts that they control (e.g., hand has fingers.)'''
@@ -556,11 +663,11 @@ class BodyPart(ABC):
 		pass
 
 class LongTermMemory(BodyPart):
-	def __init__(self, name):
+	def __init__(self, name, store={}, activations={}):
 		super(LongTermMemory, self).__init__(name, 0, 0)
 
-		self.store = {}
-		self.activations = {} # a dictonary of pairs containing last activation time and activation value keyed by symbols they represent.
+		self.store = store
+		self.activations = activations # a dictonary of pairs containing last activation time and activation value keyed by symbols they represent.
 		self.retrievel_noise = 0.60
 		self.F = 1.06 #  a scaling factor for retrieval times.
 		self.f = 1.53 # scaling of the effect of activation on retrieval time.
@@ -603,14 +710,11 @@ class LongTermMemory(BodyPart):
 			activation = self.activations[symbol]
 			t = timestamp - activation[0]
 
-			if t <= 0:
-				print('stop!')
-
 			activation = (timestamp, activation[1] + t**(-self.d))
 
 			B = math.log(activation[1])
 
-			duration = self.F*math.exp(self.f*B)*1000 # Convert from seconds to milliseconds.
+			duration = self.F*math.exp(-1*self.f*B)*1000 # Convert from seconds to milliseconds.
 		else:
 			# This is the first time.
 			activation = (timestamp, 0)
